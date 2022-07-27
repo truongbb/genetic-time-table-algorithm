@@ -1,0 +1,10 @@
+server:
+  port: 9870
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+
+spring:
+  application:
+    name: 'tim-table-scheduling'

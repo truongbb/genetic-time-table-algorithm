@@ -1,0 +1,8 @@
+package com.github.truongbb.timetableschedule.constant;
+
+public class TimeTableConstants {
+
+    public static final int LAST_ORDER = 5;
+    public static final int LAST_DAY = 7;
+
+}
