@@ -56,30 +56,6 @@ public class TimeTableScheduler {
         this.prepareData();
         this.generateBase();
 
-
-//        System.out.println("\t\t\t\t\t\t 6A \t\t\t\t\t\t\t\t 6B \t\t\t\t\t\t\t\t 6C \t\t\t\t\t\t\t\t 6D \t\t\t\t\t\t\t\t 7A \t\t\t\t\t\t\t\t 7B \t\t\t\t\t\t\t\t 7C \t\t\t\t\t\t\t\t 7D \t\t\t\t\t\t\t\t 8A \t\t\t\t\t\t\t\t 8B \t\t\t\t\t\t\t\t 8C \t\t\t\t\t\t\t\t 8D \t\t\t\t\t\t\t\t 9A \t\t\t\t\t\t\t\t 9B \t\t\t\t\t\t\t\t 9C \t\t\t\t\t\t\t\t 9D");
-//        timeTables
-//                .entrySet()
-//                .stream()
-//                .sorted(Map.Entry.comparingByKey())
-//                .forEach(entry -> {
-//                    LessonKey lessonKey = entry.getKey();
-//                    List<Lesson> lessons = entry.getValue();
-//                    lessons = lessons
-//                            .stream()
-//                            .sorted(Comparator.comparing(l -> l.getClazz().getName()))
-//                            .collect(Collectors.toList());
-//                    System.out.print("Thứ " + lessonKey.getDay() + ", tiết " + lessonKey.getOrder() + "\t\t");
-//                    lessons.forEach(l -> {
-//                        if (ObjectUtils.isEmpty(l.getTeacher())) {
-//                            System.out.printf("%-8s - %-12s\t\t\t\t|\t", "NULL", l.getSubject().getName());
-//                            return;
-//                        }
-//                        System.out.printf("%-8s - %-12s\t\t\t\t|\t", l.getTeacher().getName(), l.getSubject().getName());
-//                    });
-//                    System.out.println();
-//                });
-
         this.showOutput();
         this.evolutionToCorrect();
         this.showOutput();
