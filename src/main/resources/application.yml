@@ -18,8 +18,8 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521:xe
-    username: time_table_schedule
-    password: admin
+    username: sql_tkb
+    password: 123456
     dbcp2:
       test-while-idle: true
       validation-query: SELECT 1 FROM DUAL
