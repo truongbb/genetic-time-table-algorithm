@@ -26,7 +26,7 @@ public class TimeTableScheduler {
     private List<Teacher> teachers; // toàn bộ giáo viên
     private List<Subject> subjects; // toàn bộ môn học
     private Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
-    private List<Lesson> waitingTimeTables; // các tiết học chờ xếp lịch (chỉ có lớp và môn, chưa biết ai dạy và dạy vào buổi nào)
+    private List<Lesson> waitingTimeTables; // các tiết học chờ xếp lịch (giáo viên được gán vào môn mình dạy và lớp mình dạy, cùng với tổng số tiết cần dạy trong tuần, nhưng chưa được xếp vào ngày nào, tiết nào)
 
     private final SubjectRepository subjectRepository;
     private final TeacherRepository teacherRepository;
@@ -56,7 +56,7 @@ public class TimeTableScheduler {
         this.prepareData();
         this.generateBase();
 
-        System.out.println("\t\t\t\t\t\t 6A \t\t\t\t 6B \t\t\t\t 6C \t\t\t\t 6D \t\t\t\t 7A \t\t\t\t 7B \t\t\t\t 7C \t\t\t\t 7D \t\t\t\t 8A \t\t\t\t 8B \t\t\t\t 8C \t\t\t\t 8D \t\t\t\t 9A \t\t\t\t 9B \t\t\t\t 9C \t\t\t\t 9D");
+        System.out.println("\t\t\t\t\t\t\t\t 6A \t\t\t\t\t 6B \t\t\t\t\t 6C \t\t\t\t\t 6D \t\t\t\t\t 7A \t\t\t\t\t 7B \t\t\t\t\t 7C \t\t\t\t\t 7D \t\t\t\t\t 8A \t\t\t\t\t 8B \t\t\t\t\t 8C \t\t\t\t\t 8D \t\t\t\t\t 9A \t\t\t\t\t 9B \t\t\t\t\t 9C \t\t\t\t\t 9D");
         timeTables
                 .entrySet()
                 .stream()
@@ -70,25 +70,29 @@ public class TimeTableScheduler {
                             .collect(Collectors.toList());
                     System.out.print("Thứ " + lessonKey.getDay() + ", tiết " + lessonKey.getOrder() + "\t\t");
                     lessons.forEach(l -> {
-                        if (ObjectUtils.isEmpty(l) || ObjectUtils.isEmpty(l.getTeacher()) || ObjectUtils.isEmpty(l.getSubject()) || ObjectUtils.isEmpty(l.getSubject())) {
+                        if (ObjectUtils.isEmpty(l.getTeacher())) {
+                            System.out.printf("%-8s - %-12s\t\t\t\t|\t", "NULL", l.getSubject().getName());
                             return;
                         }
-                        System.out.print("\t\t" + l.getTeacher().getName() + " | " + l.getSubject().getName() + "\t\t");
+                        System.out.printf("%-8s - %-12s\t\t\t\t|\t", l.getTeacher().getName(), l.getSubject().getName());
                     });
                     System.out.println();
                 });
 
-//        this.evolutionToCorrect();
-        // fineTuning
+        this.evolutionToCorrect();
+        // TODO - fineTuning
     }
 
+    /**
+     * 0. chuẩn bị dữ liệu
+     */
     private void prepareData() {
         // load all data from DB
         this.clazzes = clazzRepository.getAll();
         this.subjects = subjectRepository.getAll();
         this.teachers = teacherRepository.getAll();
 
-        // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước)
+        // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước trong DB)
         this.waitingTimeTables = lessonRepository.getAll();
 
         // khởi tạo timeTables là danh sách rỗng
@@ -106,7 +110,7 @@ public class TimeTableScheduler {
     }
 
     /**
-     * 1. Tạo thời khóa biểu cơ sở (quần thể cơ sở): chỉ cần đủ các tiết, giáo viên, đủ giờ dạy, không quan tâm tới các yếu tố trùng tiết và yếu tốt làm tốt
+     * 1. Tạo thời khóa biểu cơ sở (quần thể cơ sở): chỉ cần đủ các tiết, giáo viên, đủ giờ dạy, không quan tâm tới các yếu tố trùng tiết và yếu tố làm tốt
      */
     private void generateBase() {
 
@@ -119,18 +123,28 @@ public class TimeTableScheduler {
          * 1 tuần có max là 30 tiết nên cứ cho lặp lại cho chắc, hết waiting thì break
          */
 
-        for (int i = 1; i <= 30; i++) {
-            for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
-                for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
-                    if ((day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
-                            (day == TimeTableConstants.LAST_DAY && order == TimeTableConstants.LAST_ORDER)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
-                        continue;
-                    }
+//        for (int i = 1; i <= 30; i++) {
+        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
+            for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
+                if ((day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
+                        (day == TimeTableConstants.LAST_DAY && order == TimeTableConstants.LAST_ORDER)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
+                    continue;
+                }
+                for (int j = 0; j < this.clazzes.size(); j++) {
+                    Clazz currentClazz = this.clazzes.get(j);
+
+//                    List<Lesson> filteredLessons = this.waitingTimeTables.stream().filter(le -> le.getClazz().getName().equals(currentClazz.getName())).collect(Collectors.toList());
+
                     for (int k = 0; k < this.waitingTimeTables.size(); k++) {
-                        Lesson lesson = waitingTimeTables.get(k);
+                        Lesson lesson = this.waitingTimeTables.get(k);
+
+                        if (!lesson.getClazz().getName().equals(currentClazz.getName())) {// tiết đó không dành cho lớp này thì bỏ qua
+                            continue;
+                        }
+
                         List<Lesson> lessons = timeTables.get(new LessonKey(day, order));
 
-                        // nếu trùng vào ngày đó, tiết đó, lớp đó có môn rồi --> duyệt tiếp, không chèn vào tiết học khác đã tồn tại
+                        // nếu trùng vào ngày đó, tiết đó, lớp đó có môn rồi --> duyệt tiếp, không chèn vào tiết học khác đã được xếp vào tiết đó hôm đó
                         if (lessons.stream().anyMatch(l -> !ObjectUtils.isEmpty(l)
                                 && l.getClazz().getName().equals(lesson.getClazz().getName())
                                 && !ObjectUtils.isEmpty(l.getSubject()))) {
@@ -143,12 +157,7 @@ public class TimeTableScheduler {
                             continue;
                         }
 
-                        // ghi tiết nghỉ nếu tiết này là tiết nghỉ
-                        if (this.isOffLesson(day, order, lesson.getClazz().getName().substring(0, 1))) {
-                            // TODO - thêm vào timetables
-                        }
-
-                        // ghi tiết đầu tiên đang chờ
+                        // ghi tiết đầu tiên đang chờ và thỏa mãn điều kiện
                         Lesson temp = new Lesson();
                         temp.setSubject(lesson.getSubject());
                         temp.setTeacher(lesson.getTeacher());
@@ -158,15 +167,11 @@ public class TimeTableScheduler {
                     }
                 }
             }
-            if (this.waitingTimeTables.isEmpty()) {
-                break;
-            }
         }
-    }
-
-    private boolean isOffLesson(int day, int order, String substring) {
-        // TODO - check tiết nghỉ
-        return false;
+//            if (this.waitingTimeTables.isEmpty()) {
+//                break;
+//            }
+//        }
     }
 
     private void setLesson(int day, int order, Lesson temp, int lessonIndex) {
@@ -226,7 +231,12 @@ public class TimeTableScheduler {
     }
 
     /**
-     * 2. Tiến hóa đến mức đúng
+     * 2. Tiến hóa đến mức đúng, để đảm bảo các tiêu chí sau:
+     *      - Không trùng tiết của giáo viên
+     *      - Không trùng phòng máy thực hành
+     *      - Toán, Văn, Thể dục không học tiết cuối
+     *      - Trong tuần có 2 tiết Văn liên tiếp, 2 tiết Toán liên tiếp và 2 tiết Tin liên tiếp
+     *      - Phân bố đều các môn còn lại, ví dụ không học 2 môn Địa cùng 1 ngày hoặc 2 ngày sát nhau
      */
     private void evolutionToCorrect() {
         boolean hasIssue = true;

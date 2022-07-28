@@ -89,6 +89,8 @@ insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spac
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (17,'Công dân',null,0,0,0,'Công dân', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (18,'VănKT',null,2,1,0,'VănKT', 0);
 
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (19,'Nghỉ',null,0,0,0,'Nghỉ', 0);
+
 -- dữ liệu thời khóa biểu của các lớp
 
 --6A
@@ -362,3 +364,23 @@ insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) v
 insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (238, 35, 1, 16, 4);
 insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (239, 21, 2, 16, 2);
 insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (240, 35, 11, 16, 1);
+
+
+--Tiết nghỉ
+-- khối 6
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (241, null, 19, 1, 3);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (242, null, 19, 2, 3);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (243, null, 19, 3, 3);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (244, null, 19, 4, 3);
+
+--khối 7
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (245, null, 19, 5, 2);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (246, null, 19, 6, 2);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (247, null, 19, 7, 2);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (248, null, 19, 8, 2);
+
+-- khối 9
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (249, null, 19, 13, 1);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (250, null, 19, 14, 1);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (251, null, 19, 15, 1);
+insert into time_table (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (252, null, 19, 16, 1);
