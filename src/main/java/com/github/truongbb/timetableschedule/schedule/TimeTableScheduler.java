@@ -56,7 +56,7 @@ public class TimeTableScheduler {
         this.prepareData();
         this.generateBase();
 
-        System.out.println("\t\t\t\t\t\t\t\t 6A \t\t\t\t\t 6B \t\t\t\t\t 6C \t\t\t\t\t 6D \t\t\t\t\t 7A \t\t\t\t\t 7B \t\t\t\t\t 7C \t\t\t\t\t 7D \t\t\t\t\t 8A \t\t\t\t\t 8B \t\t\t\t\t 8C \t\t\t\t\t 8D \t\t\t\t\t 9A \t\t\t\t\t 9B \t\t\t\t\t 9C \t\t\t\t\t 9D");
+        System.out.println("\t\t\t\t\t\t 6A \t\t\t\t\t\t\t\t 6B \t\t\t\t\t\t\t\t 6C \t\t\t\t\t\t\t\t 6D \t\t\t\t\t\t\t\t 7A \t\t\t\t\t\t\t\t 7B \t\t\t\t\t\t\t\t 7C \t\t\t\t\t\t\t\t 7D \t\t\t\t\t\t\t\t 8A \t\t\t\t\t\t\t\t 8B \t\t\t\t\t\t\t\t 8C \t\t\t\t\t\t\t\t 8D \t\t\t\t\t\t\t\t 9A \t\t\t\t\t\t\t\t 9B \t\t\t\t\t\t\t\t 9C \t\t\t\t\t\t\t\t 9D");
         timeTables
                 .entrySet()
                 .stream()
@@ -81,6 +81,7 @@ public class TimeTableScheduler {
 
         this.evolutionToCorrect();
         // TODO - fineTuning
+        this.fineTuning(0,3);
     }
 
     /**
@@ -248,7 +249,7 @@ public class TimeTableScheduler {
                 for (int order = 1; order < TimeTableConstants.LAST_ORDER; order++) {
                     LessonKey lessonKey = new LessonKey(day, order);
                     List<Lesson> lessons = this.timeTables.get(lessonKey);
-                    for (int k = 0; k < lessons.size(); k++) {
+                    for (int k = 0; k <= lessons.size(); k++) {
                         Lesson lesson = lessons.get(k);
                         Teacher teacher = lesson.getTeacher();
                         if (!ObjectUtils.isEmpty(teacher) && this.isTeacherBusy(day, order, lesson.getClazz(), teacher)) {
@@ -316,5 +317,107 @@ public class TimeTableScheduler {
         return lessons.stream().filter(lesson -> lesson.getClazz().getName().equals(className)).findFirst().orElse(null);
     }
 
+
+    // giai đoạn 3 tinh chỉnh/ tính toán
+    private void fineTuning(int from , int to) {
+        int dao = 0;
+        int max_score = -99999999;
+        for (int i = from; i < to; i++) {
+            for (int day = 2; day < TimeTableConstants.LAST_DAY; day++) {
+                for (int order = 1; order < TimeTableConstants.LAST_ORDER; order++) {
+                    LessonKey lessonKey = new LessonKey(day, order);
+                    List<Lesson> lessons = this.timeTables.get(lessonKey);
+                    for (int k = 0; k <= lessons.size(); k++) {
+                        Lesson lesson = lessons.get(k);
+                        if(!lesson.isStatic()){
+                            continue;
+                        }
+                        LessonKey replacementAllTeachers = this.findAllReplacement(day, order,lesson );
+                        if (ObjectUtils.isEmpty(replacementAllTeachers)) {
+                            continue;
+                        }else{
+                            dao++;
+                            //có tìm được giáo viên thay thế thì đảo tiết giữa 2 GV
+                            // Sau khi đảo xong thì cả 2 GV đã hết bị trùng lịch
+
+                            // xử lý đảo
+
+                            int score = fitness();
+
+                            // nếu kết quả tốt hơn thì lưu kết quả tốt nhất
+
+                            if (max_score < score){
+                                max_score = score;
+                                // this->bestResults = this->results
+                                //file_put_contents()
+                            }
+                            System.out.println("Lần chạy thứ " + i + " kết quả " + score + " tốt nhất " + max_score);
+                            // this->results = this->bestResults
+
+
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+    * Đánh giá điểm của TKB
+    */
+    private int fitness(){
+        int score = 10000;
+        // Tiêu chí 1: Tránh tiết cuối
+        for (int i = 0; i < 3; i++) {
+            for (int day = 1; day < TimeTableConstants.LAST_DAY; day++) {
+              for (int order = 2; order < TimeTableConstants.LAST_ORDER; order++) {
+                    LessonKey lessonKey = new LessonKey(day, order);
+                    List<Lesson> lessons = this.timeTables.get(lessonKey);
+                    for (int k = 0; k <= lessons.size(); k++) {
+                        Lesson lesson = lessons.get(k);
+                        // Môn học tránh tiết cuối
+                        if (order == 5 && lesson.getSubject().getAvoidLastLesson() == true) {
+                            score -= 5;
+                        }
+
+                        // Môn học block nhưng nó lại không liền
+                        if (lesson.getSubject().getBlockNumber() > 1){
+
+                            // kiểm tra tiết trước
+                            boolean before = false;
+                            List<Lesson> lessonList = this.timeTables.get(new LessonKey(day, order - 1));
+                            Lesson previousLesson = findByClassName(lessonList, lesson.getClazz().getName());
+                            boolean ckeckBlockBefore = previousLesson.getClazz().getName().equals(findByClassName(lessons, lesson.getClazz().getName()).getClazz().getName());
+                            if (!ObjectUtils.isEmpty(previousLesson) && ckeckBlockBefore){
+                                before = true;
+
+                            }
+
+                            // kiểm tra tiết sau
+                            boolean after = false;
+                            List<Lesson> lessonListAfter = this.timeTables.get(new LessonKey(day, order + 1));
+                            Lesson afterLesson = findByClassName(lessonListAfter, lesson.getClazz().getName());
+                            boolean ckeckBlockAfter = afterLesson.getClazz().getName().equals(findByClassName(lessons, lesson.getClazz().getName()).getClazz().getName());
+                            if (!ObjectUtils.isEmpty(afterLesson) && ckeckBlockAfter){
+                                after = true;
+                            }
+                            if (before || after){
+                                score += 100;
+                            }else{
+                                score -= 100;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    private LessonKey findAllReplacement(int day, int order, Lesson lesson) {
+
+        return null;
+    }
 
 }
