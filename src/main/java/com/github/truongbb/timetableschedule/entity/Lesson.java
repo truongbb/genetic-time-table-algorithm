@@ -19,15 +19,15 @@ public class Lesson implements Serializable {
     @Column(nullable = false)
     Integer id;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "TEACHER_ID")
     @ManyToOne(targetEntity = Teacher.class)
     Teacher teacher;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "SUBJECT_ID")
     @ManyToOne(targetEntity = Subject.class)
     Subject subject;
 
-    @Column(nullable = false)
+    @JoinColumn(name = "CLAZZ_ID")
     @ManyToOne(targetEntity = Clazz.class)
     Clazz clazz;
 

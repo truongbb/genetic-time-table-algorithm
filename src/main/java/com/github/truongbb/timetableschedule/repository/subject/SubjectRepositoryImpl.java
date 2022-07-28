@@ -3,6 +3,7 @@ package com.github.truongbb.timetableschedule.repository.subject;
 import com.github.truongbb.timetableschedule.entity.Subject;
 import com.github.truongbb.timetableschedule.repository.BaseRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -16,7 +17,13 @@ public class SubjectRepositoryImpl extends BaseRepository implements SubjectRepo
 
     @Override
     public Subject getStaticSubject(String subjectName) {
-        return getSession().createQuery("from Subject s where s.name = " + subjectName, Subject.class).getSingleResult();
+        if (StringUtils.isEmpty(subjectName)) {
+            return null;
+        }
+        return getSession()
+                .createQuery("select s from Subject s where s.name = :p_name", Subject.class)
+                .setParameter("p_name", subjectName)
+                .getSingleResult();
     }
 
 }

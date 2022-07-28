@@ -10,14 +10,14 @@ import com.github.truongbb.timetableschedule.entity.Teacher;
 import com.github.truongbb.timetableschedule.repository.clazz.ClazzRepository;
 import com.github.truongbb.timetableschedule.repository.subject.SubjectRepository;
 import com.github.truongbb.timetableschedule.repository.teacher.TeacherRepository;
+import com.github.truongbb.timetableschedule.repository.timetableconfig.LessonRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class TimeTableScheduler {
@@ -31,12 +31,14 @@ public class TimeTableScheduler {
     private final SubjectRepository subjectRepository;
     private final TeacherRepository teacherRepository;
     private final ClazzRepository clazzRepository;
+    private final LessonRepository lessonRepository;
 
 
-    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository) {
+    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository) {
         this.subjectRepository = subjectRepository;
         this.teacherRepository = teacherRepository;
         this.clazzRepository = clazzRepository;
+        this.lessonRepository = lessonRepository;
     }
 
     public void generateTimeTable() {
@@ -53,7 +55,30 @@ public class TimeTableScheduler {
 
         this.prepareData();
         this.generateBase();
-        this.evolutionToCorrect();
+
+        System.out.println("\t\t\t\t\t\t 6A \t\t\t\t 6B \t\t\t\t 6C \t\t\t\t 6D \t\t\t\t 7A \t\t\t\t 7B \t\t\t\t 7C \t\t\t\t 7D \t\t\t\t 8A \t\t\t\t 8B \t\t\t\t 8C \t\t\t\t 8D \t\t\t\t 9A \t\t\t\t 9B \t\t\t\t 9C \t\t\t\t 9D");
+        timeTables
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    LessonKey lessonKey = entry.getKey();
+                    List<Lesson> lessons = entry.getValue();
+                    lessons = lessons
+                            .stream()
+                            .sorted(Comparator.comparing(l -> l.getClazz().getName()))
+                            .collect(Collectors.toList());
+                    System.out.print("Thứ " + lessonKey.getDay() + ", tiết " + lessonKey.getOrder() + "\t\t");
+                    lessons.forEach(l -> {
+                        if (ObjectUtils.isEmpty(l) || ObjectUtils.isEmpty(l.getTeacher()) || ObjectUtils.isEmpty(l.getSubject()) || ObjectUtils.isEmpty(l.getSubject())) {
+                            return;
+                        }
+                        System.out.print("\t\t" + l.getTeacher().getName() + " | " + l.getSubject().getName() + "\t\t");
+                    });
+                    System.out.println();
+                });
+
+//        this.evolutionToCorrect();
         // fineTuning
     }
 
@@ -63,8 +88,21 @@ public class TimeTableScheduler {
         this.subjects = subjectRepository.getAll();
         this.teachers = teacherRepository.getAll();
 
-        // TODO - phối hợp các môn vào các lớp --> khởi tạo waitingTimeTables
+        // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước)
+        this.waitingTimeTables = lessonRepository.getAll();
 
+        // khởi tạo timeTables là danh sách rỗng
+        timeTables = new HashMap<>();
+        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
+            for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
+                LessonKey lessonKey = new LessonKey(day, order);
+                List<Lesson> lessons = timeTables.get(lessonKey);
+                if (!CollectionUtils.isEmpty(lessons)) {
+                    continue;
+                }
+                timeTables.put(lessonKey, new ArrayList<>());
+            }
+        }
     }
 
     /**
@@ -76,21 +114,35 @@ public class TimeTableScheduler {
         this.setStaticLesson();
 
         /**
-         * lặp tối đa 35 lần để rải hết các môn học, đáng lẽ không cần lặp tuy nhiên trong quá trình rải đôi khi 1 số môn bị chưa đủ thời lượng học
+         * lặp tối đa 30 lần để rải hết các môn học, đáng lẽ không cần lặp tuy nhiên trong quá trình rải đôi khi 1 số môn bị chưa đủ thời lượng học
          * do môn đó chiếm 2 tiết, mà giả sử thứ tự rải hiện tại đang ở tiết 4, thì tạm thời để môn đó waiting rồi lần rải sau sẽ rải lại
-         * 1 tuần có max là 35 tiết nên cứ cho lặp lại cho chắc, hết waiting thì break
+         * 1 tuần có max là 30 tiết nên cứ cho lặp lại cho chắc, hết waiting thì break
          */
 
-        for (int i = 0; i < 35; i++) {
-            for (int day = 2; day < TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
-                for (int order = 1; order < TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
+        for (int i = 1; i <= 30; i++) {
+            for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
+                for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
+                    if ((day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
+                            (day == TimeTableConstants.LAST_DAY && order == TimeTableConstants.LAST_ORDER)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
+                        continue;
+                    }
                     for (int k = 0; k < this.waitingTimeTables.size(); k++) {
                         Lesson lesson = waitingTimeTables.get(k);
-                        // nếu tiết này có lịch rồi thì bỏ qua
                         List<Lesson> lessons = timeTables.get(new LessonKey(day, order));
-                        if (lessons.stream().anyMatch(l -> !l.getClazz().getName().equals(lesson.getClazz().getName()))) {
+
+                        // nếu trùng vào ngày đó, tiết đó, lớp đó có môn rồi --> duyệt tiếp, không chèn vào tiết học khác đã tồn tại
+                        if (lessons.stream().anyMatch(l -> !ObjectUtils.isEmpty(l)
+                                && l.getClazz().getName().equals(lesson.getClazz().getName())
+                                && !ObjectUtils.isEmpty(l.getSubject()))) {
                             continue;
                         }
+                        // nếu tiết này có lịch rồi thì bỏ qua (vào hôm đó, tiết đó, môn đó, lớp đó -> nếu trùng tất cả thì sẽ bỏ qua)
+                        if (lessons.stream().anyMatch(l -> !ObjectUtils.isEmpty(l)
+                                && l.getClazz().getName().equals(lesson.getClazz().getName())
+                                && l.getSubject().getName().equals(lesson.getSubject().getName()))) {
+                            continue;
+                        }
+
                         // ghi tiết nghỉ nếu tiết này là tiết nghỉ
                         if (this.isOffLesson(day, order, lesson.getClazz().getName().substring(0, 1))) {
                             // TODO - thêm vào timetables
@@ -114,6 +166,7 @@ public class TimeTableScheduler {
 
     private boolean isOffLesson(int day, int order, String substring) {
         // TODO - check tiết nghỉ
+        return false;
     }
 
     private void setLesson(int day, int order, Lesson temp, int lessonIndex) {
@@ -123,7 +176,13 @@ public class TimeTableScheduler {
             existedLesson = new ArrayList<>();
         }
         existedLesson.add(temp);
-        this.waitingTimeTables.remove(lessonIndex);
+        this.timeTables.put(keyTmp, existedLesson);
+        Lesson lesson = this.waitingTimeTables.get(lessonIndex);
+        if (lesson.getLessonQuantity() == 1) {
+            this.waitingTimeTables.remove(lessonIndex);
+        } else {
+            lesson.setLessonQuantity(lesson.getLessonQuantity() - 1);
+        }
     }
 
     private void setStaticLesson() {
@@ -133,7 +192,7 @@ public class TimeTableScheduler {
         Subject classMeetingSubject = subjectRepository.getStaticSubject(StaticSubject.CLASS_MEETING.value);
 
         LessonKey saluteFlagLessonKey = new LessonKey(2, 1);// thứ 2, tiết 1
-        LessonKey classMeetingLessonKey = new LessonKey(2, 1);// thứ 2, tiết 1
+        LessonKey classMeetingLessonKey = new LessonKey(7, 5);// thứ 7, tiết 5
         List<Lesson> saluteFlagLessons = new ArrayList<>();
         List<Lesson> classMeetingLessons = new ArrayList<>();
         for (int i = 0; i < this.clazzes.size(); i++) {
@@ -237,6 +296,7 @@ public class TimeTableScheduler {
 
     private boolean isTeacherBusy(int day, int order, Clazz clazz, Teacher teacher) {
         // TODO - check giáo viên bận
+        return false;
     }
 
     private Lesson findByClassName(List<Lesson> lessons, String className) {

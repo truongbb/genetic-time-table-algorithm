@@ -30,7 +30,7 @@ public class Teacher implements Serializable {
     @Column(name = "SKIP_DAYS")
     String skipDays;
 
-    @Column(name = "HEAD_CLAZZ_ID")
+    @JoinColumn(name = "HEAD_CLAZZ_ID")
     @ManyToOne(targetEntity = Clazz.class)
     Clazz headClazz;
 

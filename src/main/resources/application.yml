@@ -8,3 +8,18 @@ server:
 spring:
   application:
     name: 'tim-table-scheduling'
+
+  jpa:
+    properties:
+      hibnernate:
+        jdbc:
+          batch_size: 5000
+
+  datasource:
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    username: time_table_schedule
+    password: admin
+    dbcp2:
+      test-while-idle: true
+      validation-query: SELECT 1 FROM DUAL

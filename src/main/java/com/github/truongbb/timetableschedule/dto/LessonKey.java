@@ -8,9 +8,13 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
-public class LessonKey {
+public class LessonKey implements Comparable<LessonKey> {
 
     int day;
     int order;
 
+    @Override
+    public int compareTo(LessonKey o) {
+        return this.day - o.day;
+    }
 }

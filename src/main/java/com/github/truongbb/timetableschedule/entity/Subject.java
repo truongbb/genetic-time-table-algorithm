@@ -24,7 +24,7 @@ public class Subject implements Serializable {
     @Column(nullable = false)
     String name;
 
-    @Column(name = "LAB_ID", nullable = false)
+    @JoinColumn(name = "LAB_ID")
     @ManyToOne(targetEntity = Laboratory.class)
     Laboratory laboratory;
 
