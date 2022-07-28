@@ -41,7 +41,7 @@ create table teachers
 create table time_table
 (
     id              number not null,
-    teacher_id      number not null,
+    teacher_id      number,
     subject_id      number not null,
     clazz_id        number not null,
     lesson_quantity number not null,
