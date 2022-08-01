@@ -223,18 +223,18 @@ public class TimeTableScheduler {
         do {
             generation++;
             hasIssue = false;
-            for (int day = 2; day < TimeTableConstants.LAST_DAY; day++) {
-                for (int order = 1; order < TimeTableConstants.LAST_ORDER; order++) {
+            for (int day = 2; day <= TimeTableConstants.LAST_DAY; day++) {
+                for (int order = 1; order <= TimeTableConstants.LAST_ORDER; order++) {
                     LessonKey lessonKey = new LessonKey(day, order);
                     List<Lesson> lessons = this.timeTables.get(lessonKey);
-                    for (int k = 0; k <= lessons.size(); k++) {
+                    for (int k = 0; k < lessons.size(); k++) {
                         Lesson lesson = lessons.get(k);
                         // kiểm tra giáo viên trùng lịch
                         Teacher teacher = lesson.getTeacher();
                         if (!ObjectUtils.isEmpty(teacher) && this.isTeacherBusy(day, order, lesson.getClazz(), teacher)) {
                             lesson.setTeacherBusy(true);
                             // rơi vào tình huống trùng lịch thì tìm giáo viên thay thế
-                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson.getClazz());
+                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson.getClazz(), teacher);
                             if (ObjectUtils.isEmpty(replacementLessonKey)) { // không tìm được giáo viên thay thế
                                 hasIssue = true;
                                 continue;
@@ -257,7 +257,7 @@ public class TimeTableScheduler {
         System.out.println("generation: " + generation);
     }
 
-    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Clazz clazz) {
+    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Clazz clazz, Teacher busyTeacher) {
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
                 if ((day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
@@ -274,11 +274,7 @@ public class TimeTableScheduler {
                     // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
                     if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, lesson.getTeacher())) {
                         // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                        Lesson replaceLesson = this.findByClassName(lessons, clazz.getName());
-                        if (ObjectUtils.isEmpty(replaceLesson)) {
-                            return null;
-                        }
-                        if (!this.isTeacherBusy(day, order, clazz, replaceLesson.getTeacher())) {
+                        if (!this.isTeacherBusy(day, order, clazz, busyTeacher)) {
                             return lessonKey;
                         }
                     }
@@ -294,7 +290,7 @@ public class TimeTableScheduler {
                 .get(new LessonKey(day, order))
                 .stream()
                 .anyMatch(lesson ->
-                        !lesson.getClazz().getId().equals(clazz.getId())
+                        !ObjectUtils.isEmpty(lesson.getClazz()) && !ObjectUtils.isEmpty(lesson.getTeacher()) && !lesson.getClazz().getId().equals(clazz.getId())
                                 && lesson.getTeacher().getId().equals(teacher.getId())
                 );
     }
