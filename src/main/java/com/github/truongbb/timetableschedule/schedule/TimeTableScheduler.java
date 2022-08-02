@@ -227,8 +227,8 @@ public class TimeTableScheduler {
         do {
             generation++;
             hasIssue = false;
-            for (int day = 2; day < TimeTableConstants.LAST_DAY; day++) {
-                for (int order = 2; order < TimeTableConstants.LAST_ORDER; order++) {
+            for (int day = 2; day <= TimeTableConstants.LAST_DAY; day++) {
+                for (int order = 1; order <= TimeTableConstants.LAST_ORDER; order++) {
                     LessonKey lessonKey = new LessonKey(day, order);
                     List<Lesson> lessons = this.timeTables.get(lessonKey);
                     for (int k = 0; k < lessons.size(); k++) {
@@ -238,20 +238,19 @@ public class TimeTableScheduler {
                         if (!ObjectUtils.isEmpty(teacher) && this.isTeacherBusy(day, order, lesson.getClazz(), teacher)) {
                             lesson.setTeacherBusy(true);
                             // rơi vào tình huống trùng lịch thì tìm giáo viên thay thế
-                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson.getClazz());
+                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson.getClazz(), teacher);
                             if (ObjectUtils.isEmpty(replacementLessonKey)) { // không tìm được giáo viên thay thế
                                 hasIssue = true;
                                 continue;
                             }
                             // sau khi đảo xong thì cả 2 giáo viên đã hết bị trùng tiết
                             List<Lesson> replacementLessons = this.timeTables.get(replacementLessonKey);
-                            Lesson replacementLesson = findByClassName(replacementLessons, lesson.getClazz().getName());// xem lại
+                            Lesson replacementLesson = findByClassName(replacementLessons, lesson.getClazz().getName());
                             replacementLesson.setTeacherBusy(false);
                             lesson.setTeacherBusy(false);
 
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(replacementLessonKey).set(k, lesson);
-                            //this.showOutput();
                         } else {
                             lesson.setTeacherBusy(false);
                         }
@@ -262,7 +261,7 @@ public class TimeTableScheduler {
         System.out.println("generation: " + generation);
     }
 
-    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Clazz clazz) {
+    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Clazz clazz, Teacher busyTeacher) {
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
                 if ((day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
@@ -279,19 +278,9 @@ public class TimeTableScheduler {
                     // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
                     if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, lesson.getTeacher())) {
                         // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                        LessonKey lessonKey1 = new LessonKey(replaceDay, replaceOrder);
-                        List<Lesson> lessonList = this.timeTables.get(lessonKey1);
-                        Lesson replaceLesson = this.findByClassName(lessonList, clazz.getName());
-                        if (ObjectUtils.isEmpty(replaceLesson)) {
-                            return null;
-
-                        }
-                        if (!this.isTeacherBusy(day, order, clazz, replaceLesson.getTeacher())) {
+                        if (!this.isTeacherBusy(day, order, clazz, busyTeacher)) {
                             return lessonKey;
                         }
-                    }
-                    if (lesson.getTeacher().getName().equals("NULL")){
-                        return lessonKey;
                     }
                 }
             }
@@ -305,7 +294,7 @@ public class TimeTableScheduler {
                 .get(new LessonKey(day, order))
                 .stream()
                 .anyMatch(lesson ->
-                        !lesson.getClazz().getId().equals(clazz.getId())
+                        !ObjectUtils.isEmpty(lesson.getClazz()) && !ObjectUtils.isEmpty(lesson.getTeacher()) && !lesson.getClazz().getId().equals(clazz.getId())
                                 && lesson.getTeacher().getId().equals(teacher.getId())
                 );
     }
