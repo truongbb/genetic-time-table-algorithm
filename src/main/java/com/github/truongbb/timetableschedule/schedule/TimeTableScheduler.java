@@ -103,7 +103,6 @@ public class TimeTableScheduler {
          * do môn đó chiếm 2 tiết, mà giả sử thứ tự rải hiện tại đang ở tiết 4, thì tạm thời để môn đó waiting rồi lần rải sau sẽ rải lại
          * 1 tuần có max là 30 tiết nên cứ cho lặp lại cho chắc, hết waiting thì break
          */
-        int count = 1;
 //        for (int i = 1; i <= 30; i++) {
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
@@ -126,10 +125,6 @@ public class TimeTableScheduler {
 
                         List<Lesson> lessons = timeTables.get(new LessonKey(day, order));
 
-//                        if (currentClazz.getName().equals("6A") || currentClazz.getName().equals("6B") || currentClazz.getName().equals("6C") || currentClazz.getName().equals("6D")){
-//                            count += 1;
-//                            System.out.println(count);
-//                        }
                         // nếu trùng vào ngày đó, tiết đó, lớp đó có môn rồi --> duyệt tiếp, không chèn vào tiết học khác đã được xếp vào tiết đó hôm đó
                         if (lessons.stream().anyMatch(l -> !ObjectUtils.isEmpty(l)
                                 && l.getClazz().getName().equals(lesson.getClazz().getName())
