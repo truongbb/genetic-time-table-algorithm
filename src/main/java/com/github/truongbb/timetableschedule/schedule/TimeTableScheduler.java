@@ -241,7 +241,7 @@ public class TimeTableScheduler {
                             }
                             // sau khi đảo xong thì cả 2 giáo viên đã hết bị trùng tiết
                             List<Lesson> replacementLessons = this.timeTables.get(replacementLessonKey);
-                            Lesson replacementLesson = findByClassName(replacementLessons, lesson.getClazz().getName());// xem lại
+                            Lesson replacementLesson = findByClassName(replacementLessons, lesson.getClazz().getName());
                             replacementLesson.setTeacherBusy(false);
                             lesson.setTeacherBusy(false);
 
@@ -312,7 +312,7 @@ public class TimeTableScheduler {
                 for (int order = 1; order < TimeTableConstants.LAST_ORDER; order++) {
                     LessonKey lessonKey = new LessonKey(day, order);
                     List<Lesson> lessons = this.timeTables.get(lessonKey);
-                    for (int k = 0; k <= lessons.size(); k++) {
+                    for (int k = 0; k < lessons.size(); k++) {
                         Lesson lesson = lessons.get(k);
                         if (!lesson.isStatic()) {
                             continue;
