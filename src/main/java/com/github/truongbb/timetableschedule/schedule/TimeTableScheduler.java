@@ -11,6 +11,7 @@ import com.github.truongbb.timetableschedule.repository.clazz.ClazzRepository;
 import com.github.truongbb.timetableschedule.repository.subject.SubjectRepository;
 import com.github.truongbb.timetableschedule.repository.teacher.TeacherRepository;
 import com.github.truongbb.timetableschedule.repository.timetableconfig.LessonRepository;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Getter
 public class TimeTableScheduler {
 
     private List<Clazz> clazzes; // toàn bộ lớp học

@@ -1,0 +1,21 @@
+body {
+    box-sizing: border-box;
+}
+
+table, th, tr, td {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.bg-gray {
+    background-color: #ebebeb;
+}
+
+.text-center {
+    vertical-align: middle;
+    text-align: center;
+}
