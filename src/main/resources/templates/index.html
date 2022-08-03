@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Time table</title>
+
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<table>
+    <tr>
+        <th style="width: 40px"></th>
+        <th th:each="clazz: ${allClasses}" th:text="${clazz.getName()}" class="text-center"></th>
+    </tr>
+    <tr th:each="lesson, stats : ${timeTables}">
+
+        <td th:if="${stats.index % 5 == 0}" th:text="${lesson.key.getDay()}"
+            th:class="${lesson.key.getDay() == 2 || lesson.key.getDay() == 4 || lesson.key.getDay() == 6}? 'bg-gray text-center'  : 'text-center'"
+            rowspan="5" style="width: 40px"></td>
+        <td th:each="l: ${lesson.value}" th:class="${lesson.key.getDay() == 2 || lesson.key.getDay() == 4 || lesson.key.getDay() == 6}? bg-gray : ''">
+            <span style="font-weight: bold" th:text=" | ${l.getSubject().getName()}"></span>
+            <br/>
+            <span th:text="${l.getTeacher() != null ? l.getTeacher().getName(): ''}"></span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

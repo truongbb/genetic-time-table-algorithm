@@ -15,6 +15,11 @@ public class LessonKey implements Comparable<LessonKey> {
 
     @Override
     public int compareTo(LessonKey o) {
-        return this.day - o.day;
+        int dayCompare = this.day - o.day;
+        if (dayCompare == 0) {
+            return this.day - o.day;
+        }
+        return dayCompare;
     }
+
 }
