@@ -17,7 +17,7 @@ public class LessonKey implements Comparable<LessonKey> {
     public int compareTo(LessonKey o) {
         int dayCompare = this.day - o.day;
         if (dayCompare == 0) {
-            return this.day - o.day;
+            return this.order - o.order;
         }
         return dayCompare;
     }
