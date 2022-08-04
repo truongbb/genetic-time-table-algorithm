@@ -413,20 +413,56 @@ public class TimeTableScheduler {
                                 if (day == TimeTableConstants.FIRST_DAY) {
                                     afterDayLesson = afterDayLesson(day, 1, lesson, replacementLesson);
                                 } else if (day == TimeTableConstants.LAST_DAY) {
-                                    beforeDayLesson = beforeLesson(day, 1, lesson, replacementLesson);
+                                    beforeDayLesson = beforeDayLesson(day, 1, lesson, replacementLesson);
                                 } else {
+                                    boolean midDayLesson = false;
                                     for (int repDay = day - 1; repDay <= day + 1; repDay++) {
-                                        for (int repOrder = 1; repOrder < 5; repOrder++) {
+                                        for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
                                             LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
                                             List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
                                             Lesson replacementLesson1 = this.findByClassName(checkExitLesson, lesson.getClazz().getName());
                                             if (replacementLesson1.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
+                                                midDayLesson = true;
                                                 break;
                                             }
                                         }
+                                        if (midDayLesson)
+                                            continue;
                                     }
+                                    if (midDayLesson)
+                                        continue;
                                 }
                                 if (afterDayLesson || beforeDayLesson) {
+                                    continue;
+                                }
+                            }
+                            if (lesson.getSubject().getRequireSpacing()) {
+                                boolean beforeDayLesson = false;
+                                boolean afterDayLesson = false;
+                                if (currentLessonKey.getDay() == TimeTableConstants.FIRST_DAY) {
+                                    afterDayLesson = afterDayLesson(currentLessonKey.getDay(), 1, replacementLesson, lesson);
+                                }
+                                else if (currentLessonKey.getDay() == TimeTableConstants.LAST_DAY) {
+                                    beforeDayLesson = beforeDayLesson(currentLessonKey.getDay(), 1,replacementLesson, lesson);
+                                } else{
+                                    boolean midDayLesson = false;
+                                    for (int repDay = currentLessonKey.getDay() - 1; repDay <= currentLessonKey.getDay()+1; repDay++) {
+                                        for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
+                                            LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
+                                            List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
+                                            Lesson replacementLesson1 = this.findByClassName(checkExitLesson, replacementLesson.getClazz().getName());
+                                            if (replacementLesson1.getSubject().getName().equals(lesson.getSubject().getName())){
+                                                midDayLesson = true;
+                                                break;
+                                            }
+                                        }
+                                        if (midDayLesson)
+                                            break;
+                                    }
+                                    if (midDayLesson)
+                                        continue;
+                                }
+                                if (beforeDayLesson || afterDayLesson){
                                     continue;
                                 }
                             }
@@ -454,34 +490,56 @@ public class TimeTableScheduler {
         }
     }
 
-    private boolean afterDayLesson(int day, int i, Lesson lesson, Lesson replacementLesson) {
-        for (int repDay = day; repDay <= day + 1; repDay++) {
-            for (int repOrder = 1; repOrder < 5; repOrder++) {
+    private boolean beforeDayLesson1(int day, int i, Lesson lesson, Lesson replacementLesson) {
+        for (int repDay = day - 1; repDay <= day; repDay++) {
+            for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
                 LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
                 List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
-//                for (int n = 0; n < checkExitLesson.size(); n++) {
-//                    Lesson lesson1 = checkExitLesson.get(n);
-                Lesson replacementLesson1 = this.findByClassName(checkExitLesson, lesson.getClazz().getName());
-                if (replacementLesson1.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
+                Lesson replacementLesson1 = this.findByClassName(checkExitLesson, replacementLesson.getClazz().getName());
+                if (replacementLesson1.getSubject().getName().equals(lesson.getSubject().getName())) {
                     return true;
-//                    }
                 }
             }
         }
         return false;
     }
 
-    private boolean beforeLesson(int day, int i, Lesson lesson, Lesson replacementLesson) {
-        for (int repDay = day - 1; repDay <= day; repDay++) {
-            for (int repOrder = 1; repOrder < 5; repOrder++) {
+    private boolean afterDayLesson1(int day, int i, Lesson lesson, Lesson replacementLesson) {
+        for (int repDay = day; repDay <= day + 1; repDay++) {
+            for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
                 LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
                 List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
-//                for (int n = 0; n < checkExitLesson.size(); n++) {
-//                    Lesson lesson1 = checkExitLesson.get(n);
+                Lesson replacementLesson1 = this.findByClassName(checkExitLesson, replacementLesson.getClazz().getName());
+                if (replacementLesson1.getSubject().getName().equals(lesson.getSubject().getName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean afterDayLesson(int day, int i, Lesson lesson, Lesson replacementLesson) {
+        for (int repDay = day; repDay <= day + 1; repDay++) {
+            for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
+                LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
+                List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
                 Lesson replacementLesson1 = this.findByClassName(checkExitLesson, lesson.getClazz().getName());
                 if (replacementLesson1.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
                     return true;
-//                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean beforeDayLesson(int day, int i, Lesson lesson, Lesson replacementLesson) {
+        for (int repDay = day - 1; repDay <= day; repDay++) {
+            for (int repOrder = 1; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
+                LessonKey lessonKey1 = new LessonKey(repDay, repOrder);
+                List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
+                Lesson replacementLesson1 = this.findByClassName(checkExitLesson, lesson.getClazz().getName());
+                if (replacementLesson1.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
+                    return true;
                 }
             }
         }
@@ -504,10 +562,13 @@ public class TimeTableScheduler {
                 for (int k = 0; k < lessons.size(); k++) {
                     Lesson lesson = lessons.get(k);
                     // Môn học tránh tiết cuối
-//                    if (order == TimeTableConstants.LAST_ORDER && lesson.getSubject().getAvoidLastLesson()) {
-//                        score -= 5;
-//                    }
-
+                    if (order == TimeTableConstants.LAST_ORDER) {
+                        if (lesson.getSubject().getAvoidLastLesson()) {
+                            score -= 5;
+                        } else {
+                            score += 5;
+                        }
+                    }
                     // Môn học block nhưng nó lại không liền
                     if (lesson.getSubject().getBlockNumber() > 1) {
 
@@ -532,6 +593,11 @@ public class TimeTableScheduler {
                             score -= 100;
                         }
                     }
+
+                    // môn sinh, địa có 2 tiết trong 2 ngày liên tiếp
+//                    if (lesson.getSubject().getRequireSpacing()){
+//
+//                    }
                 }
             }
         }
