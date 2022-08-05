@@ -329,6 +329,11 @@ public class TimeTableScheduler {
 
     /**
      * Lai ghép - Đánh giá - Chọn lọc
+     *
+     * - Các môn được cấu hình không học tiết cuối (như Thể dục) thì không cho học tiết cuối
+     * - Trong tuần có một ngày có 2 tiết Văn liên tiếp, Toán liên tiếp để làm bài kiểm tra
+     * - Phân bố đều các môn cần giãn cách, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
+     *
      */
     private void fineTuning(int from, int to) {
         //this.bestResultsTimeTable = this.timeTables;
