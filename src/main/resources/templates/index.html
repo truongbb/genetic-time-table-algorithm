@@ -12,15 +12,17 @@
 <body>
 <table>
     <tr>
-        <th style="width: 40px"></th>
+        <th style="width: 40px" colspan="2"></th>
         <th th:each="clazz: ${allClasses}" th:text="${clazz.getName()}" class="text-center"></th>
     </tr>
     <tr th:each="lesson, stats : ${timeTables}">
-
         <td th:if="${stats.index % 5 == 0}" th:text="${lesson.key.getDay()}"
-            th:class="${lesson.key.getDay() == 2 || lesson.key.getDay() == 4 || lesson.key.getDay() == 6}? 'bg-gray text-center'  : 'text-center'"
+            th:class="${lesson.key.getDay() % 2 == 0} ? 'bg-gray text-center'  : 'text-center'"
             rowspan="5" style="width: 40px"></td>
-        <td th:each="l: ${lesson.value}" th:class="${lesson.key.getDay() == 2 || lesson.key.getDay() == 4 || lesson.key.getDay() == 6}? bg-gray : ''">
+        <td th:class="${lesson.key.getDay() % 2 == 0} ? 'bg-gray text-center'  : 'text-center'"
+            th:text="${lesson.key.getOrder()}" style="width: 20px"></td>
+        <td th:each="l: ${lesson.value}"
+            th:class="${lesson.key.getDay() % 2 == 0} ? 'bg-gray'  : ''">
             <span style="font-weight: bold" th:text=" | ${l.getSubject().getName()}"></span>
             <br/>
             <span th:text="${l.getTeacher() != null ? l.getTeacher().getName(): ''}"></span>
