@@ -350,17 +350,30 @@ public class TimeTableScheduler {
                         // những môn đã có 2 tiết liền nhau không được đổi nữa: VănKT, Toán, tin...
                         if (lesson.getSubject().getBlockNumber() == 2) {
                             boolean checkSub1 = false;
-                            if (order < 5) {
+                            boolean checkSub2 = false;
+                            if (order < 3) {
                                 Lesson lesson1 = this.timeTables.get(new LessonKey(day, order + 1)).get(k);
                                 checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
-                            }
+                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order + 2)).get(k);
+                                checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
 
-                            boolean checkSub2 = false;
-                            if (order > 1) {
-                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order - 1)).get(k);
+                            } else {
+                                Lesson lesson1 = this.timeTables.get(new LessonKey(day, order - 1)).get(k);
+                                checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
+                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order - 2)).get(k);
+                                checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
+
+                            }
+                            if (checkSub1 && !checkSub2) {
+                                continue;
+                            }
+                            if (order != 1 && order != 5) {
+                                Lesson lesson1 = this.timeTables.get(new LessonKey(day, order - 1)).get(k);
+                                checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
+                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order + 1)).get(k);
                                 checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
                             }
-                            if (checkSub1 || checkSub2) {
+                            if ((checkSub1 && !checkSub2) || (!checkSub1 && checkSub2)) {
                                 continue;
                             }
                         }
@@ -377,6 +390,15 @@ public class TimeTableScheduler {
                             Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
                             replacementLesson.setTeacherBusy(false);
                             lesson.setTeacherBusy(false);
+
+                            // đổi lịch môn nghỉ
+
+//                            if (lesson.getSubject().getName().equals("Nghỉ") && currentLessonKey.getOrder()!=TimeTableConstants.LAST_ORDER){
+//                                continue;
+//                            }
+//                            if (replacementLesson.getSubject().getName().equals("Nghỉ") && order != TimeTableConstants.LAST_ORDER){
+//                                continue;
+//                            }
 
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(currentLessonKey).set(k, lesson);
@@ -416,7 +438,6 @@ public class TimeTableScheduler {
         }
         return false;
     }
-
 
     /**
      * Đánh giá điểm của TKB
@@ -472,10 +493,6 @@ public class TimeTableScheduler {
                         }
                     }
 
-                    // môn sinh, địa có 2 tiết trong 2 ngày liên tiếp
-//                    if (lesson.getSubject().getRequireSpacing()){
-//
-//                    }
                 }
             }
         }
