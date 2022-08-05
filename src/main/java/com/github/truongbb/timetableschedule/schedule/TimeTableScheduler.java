@@ -392,13 +392,10 @@ public class TimeTableScheduler {
                             lesson.setTeacherBusy(false);
 
                             // đổi lịch môn nghỉ
-
-//                            if (lesson.getSubject().getName().equals("Nghỉ") && currentLessonKey.getOrder()!=TimeTableConstants.LAST_ORDER){
-//                                continue;
-//                            }
-//                            if (replacementLesson.getSubject().getName().equals("Nghỉ") && order != TimeTableConstants.LAST_ORDER){
-//                                continue;
-//                            }
+                            if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && currentLessonKey.getOrder() != TimeTableConstants.LAST_ORDER)
+                                    || (replacementLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && order != TimeTableConstants.LAST_ORDER)) {
+                                continue;
+                            }
 
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(currentLessonKey).set(k, lesson);
@@ -463,9 +460,9 @@ public class TimeTableScheduler {
                         }
                         // tiết nghỉ ở cuối ngày
                         if (lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)) {
-                            score += 5;
+                            score += 100;
                         } else {
-                            score -= 5;
+                            score -= 100;
                         }
                     }
                     // Môn học block nhưng nó lại không liền
@@ -525,11 +522,6 @@ public class TimeTableScheduler {
                 // tránh những môn tiết cuối
                 if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
                         || (replaceOrder == TimeTableConstants.LAST_ORDER && tempLesson.getSubject().getAvoidLastLesson())) {
-                    continue;
-                }
-                // tiết nghỉ không phải tiết cuối thì bỏ qua
-                if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && order != TimeTableConstants.LAST_ORDER)
-                        || (tempLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && replaceOrder != TimeTableConstants.LAST_ORDER)) {
                     continue;
                 }
                 // môn sinh, địa, thể dục, ... không học 2 ngày liên tiếp
@@ -610,10 +602,9 @@ public class TimeTableScheduler {
     }
 
     /**
-     *
      * kiểm tra các điều kiện của môn đổi và môn bị đổi:
-     *  - tiết nghỉ phải là tiết cuối ngày
-     *  - các môn học tránh tiết cuối không để ở cuối
+     * - tiết nghỉ phải là tiết cuối ngày
+     * - các môn học tránh tiết cuối không để ở cuối
      *
      * @param targetLesson   môn học được đổi
      * @param replacedOrder  ví trí bị đổi
@@ -622,14 +613,8 @@ public class TimeTableScheduler {
      * @return
      */
     private boolean checkOffLessonToSwitch(Lesson targetLesson, int replacedOrder, Lesson replacedLesson, int order) {
-        if ((targetLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && replacedOrder != TimeTableConstants.LAST_ORDER)
-                || (replacedLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && order != TimeTableConstants.LAST_ORDER)) {
-            return false;
-        }
-        if (targetLesson.getSubject().getAvoidLastLesson() && replacedOrder == TimeTableConstants.LAST_ORDER) {
-            return false;
-        }
-        return true;
+        return (!targetLesson.getSubject().getAvoidLastLesson() || replacedOrder != TimeTableConstants.LAST_ORDER)
+                && (!replacedLesson.getSubject().getAvoidLastLesson() || order != TimeTableConstants.LAST_ORDER);
     }
 
     private void showOutput(Map<LessonKey, List<Lesson>> mapData) {
