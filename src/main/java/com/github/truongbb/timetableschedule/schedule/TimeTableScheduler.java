@@ -348,30 +348,26 @@ public class TimeTableScheduler {
                         }
 
                         // những môn đã có 2 tiết liền nhau không được đổi nữa: VănKT, Toán, tin...
+                        // trường hợp môn được đổi
                         if (lesson.getSubject().getBlockNumber() == 2) {
                             boolean checkSub1 = false;
                             boolean checkSub2 = false;
+
                             if (order < 3) {
-                                Lesson lesson1 = this.timeTables.get(new LessonKey(day, order + 1)).get(k);
-                                checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
-                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order + 2)).get(k);
-                                checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
+                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, k);
+                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, k);
 
                             } else {
-                                Lesson lesson1 = this.timeTables.get(new LessonKey(day, order - 1)).get(k);
-                                checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
-                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order - 2)).get(k);
-                                checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
+                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, k);
+                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order - 2, lesson, k);
 
                             }
                             if (checkSub1 && !checkSub2) {
                                 continue;
                             }
                             if (order != 1 && order != 5) {
-                                Lesson lesson1 = this.timeTables.get(new LessonKey(day, order - 1)).get(k);
-                                checkSub1 = lesson.getSubject().getName().equals(lesson1.getSubject().getName());
-                                Lesson lesson2 = this.timeTables.get(new LessonKey(day, order + 1)).get(k);
-                                checkSub2 = lesson.getSubject().getName().equals(lesson2.getSubject().getName());
+                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, k);
+                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, k);
                             }
                             if ((checkSub1 && !checkSub2) || (!checkSub1 && checkSub2)) {
                                 continue;
@@ -397,6 +393,30 @@ public class TimeTableScheduler {
                                 continue;
                             }
 
+                            // Trường hợp ngược lại môn bị đổi: môn đã có hai tiết liền nhau
+                            if (replacementLesson.getSubject().getBlockNumber() == 2) {
+                                boolean checkSub1 = false;
+                                boolean checkSub2 = false;
+                                if (currentLessonKey.getOrder() < 3) {
+                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 1, replacementLesson, k);
+                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 2, replacementLesson, k);
+
+                                } else {
+                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 1, replacementLesson, k);
+                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 2, replacementLesson, k);
+                                }
+                                if (checkSub1 && !checkSub2) {
+                                    continue;
+                                }
+                                if (currentLessonKey.getOrder() != 1 && currentLessonKey.getOrder() != 5) {
+                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 1, replacementLesson, k);
+                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 1, replacementLesson, k);
+                                }
+                                if ((checkSub1 && !checkSub2) || (!checkSub1 && checkSub2)) {
+                                    continue;
+                                }
+                            }
+
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(currentLessonKey).set(k, lesson);
 
@@ -418,6 +438,11 @@ public class TimeTableScheduler {
                 }
             }
         }
+    }
+
+    private boolean checkAdjacentLessonBeforeReplace(int day, int order,Lesson lesson, int k) {
+        Lesson lesson1 = this.timeTables.get(new LessonKey(day, order)).get(k);
+        return lesson.getSubject().getName().equals(lesson1.getSubject().getName());
     }
 
     private boolean checkAdjacentLesson(int day, String className, String replacedSubjectName, boolean isBefore) {
