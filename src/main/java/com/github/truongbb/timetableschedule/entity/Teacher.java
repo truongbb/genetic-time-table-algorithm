@@ -34,4 +34,7 @@ public class Teacher implements Serializable {
     @ManyToOne(targetEntity = Clazz.class)
     Clazz headClazz;
 
+    @Column(name = "HAS_FARFROM_HOME")
+    Boolean hasFarfromHome;
+
 }

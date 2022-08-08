@@ -34,6 +34,7 @@ create table teachers
     has_children  number(1,0) default 0 not null,
     skip_days     nvarchar2(2000),
     head_clazz_id number,
+    has_farfrom_home number(1,0) default 0 not null,
     constraint fk_teacher_clazz foreign key (clazz_id) references clazz (id)
 );
 
@@ -49,4 +50,11 @@ create table time_table
     constraint fk_time_table_clazz foreign key (clazz_id) references clazz (id),
     constraint fk_time_table_teacher foreign key (teacher_id) references teachers (id),
     constraint fk_time_table_subject foreign key (subject_id) references subjects (id)
+);
+
+create table available_teaching_day (
+    teacher_id number not null,
+    available_day number not null,
+    PRIMARY KEY (teacher_id, available_day),
+    constraint fk_available_teaching_day FOREIGN KEY (teacher_id) references teachers(id)
 );
