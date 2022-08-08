@@ -37,8 +37,17 @@ create table teachers
     constraint fk_teacher_clazz foreign key (clazz_id) references clazz (id)
 );
 
--- thời khóa biểu
-create table time_table
+-- các ngày giáo viên đăng ký dạy
+create table available_teaching_day
+(
+    teacher_id    number not null,
+    available_day number not null,
+    PRIMARY KEY (teacher_id, available_day),
+    constraint teacher_available_day_fk FOREIGN KEY (teacher_id) REFERENCES teachers (id)
+);
+
+-- các môn phân công giảng dạy cho giáo viên (thời khóa biểu cấu hình - chưa có ngày, tiết)
+create table time_table_config
 (
     id              number not null,
     teacher_id      number,
