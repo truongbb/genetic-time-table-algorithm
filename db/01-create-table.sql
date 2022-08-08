@@ -60,10 +60,3 @@ create table time_table_config
     constraint fk_time_table_teacher foreign key (teacher_id) references teachers (id),
     constraint fk_time_table_subject foreign key (subject_id) references subjects (id)
 );
-
-create table available_teaching_day (
-    teacher_id number not null,
-    available_day number not null,
-    PRIMARY KEY (teacher_id, available_day),
-    constraint fk_available_teaching_day FOREIGN KEY (teacher_id) references teachers(id)
-);
