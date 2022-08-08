@@ -333,7 +333,6 @@ public class TimeTableScheduler {
      * - Các môn được cấu hình không học tiết cuối (như Thể dục) thì không cho học tiết cuối
      * - Trong tuần có một ngày có 2 tiết Văn liên tiếp, Toán liên tiếp để làm bài kiểm tra
      * - Phân bố đều các môn cần giãn cách, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
-     *
      */
     private void fineTuning(int from, int to) {
         //this.bestResultsTimeTable = this.timeTables;
@@ -422,6 +421,30 @@ public class TimeTableScheduler {
                                 }
                             }
 
+                            // tránh việc khi đổi môn lại thành 1 ngày có 3 tiết như môn Văn khối lớp 9
+                            if (lesson.getSubject().getBlockNumber() == 2) {
+//                            if (lesson.getSubject().getName().equals("Văn")) {
+                                int count = 0;
+                                for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
+                                    count = countLesson(currentLessonKey.getDay(), reporder, replacementLesson, count);
+                                }
+                                if (count >= 2) {
+                                    continue;
+                                }
+                            }
+                            /// ngược lại
+                            if (replacementLesson.getSubject().getBlockNumber() == 2) {
+//                            if (replacementLesson.getSubject().getName().equals("Văn")) {
+                                int count = 0;
+                                for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
+                                    count = countLesson(day, reporder, lesson, count);
+                                }
+                                if (count >= 2) {
+                                    continue;
+                                }
+                            }
+
+
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(currentLessonKey).set(k, lesson);
 
@@ -444,8 +467,17 @@ public class TimeTableScheduler {
             }
         }
     }
+    private int countLesson(int day, int reporder, Lesson lesson, int count) {
+        LessonKey lessonKey1 = new LessonKey(day, reporder);
+        List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
+        Lesson replacementLesson1 = this.findByClassName(checkExitLesson, lesson.getClazz().getName());
+        if (replacementLesson1.getSubject().getName().equals(lesson.getSubject().getName())) {
+            count++;
+        }
+        return count;
+    }
 
-    private boolean checkAdjacentLessonBeforeReplace(int day, int order,Lesson lesson, int k) {
+    private boolean checkAdjacentLessonBeforeReplace(int day, int order, Lesson lesson, int k) {
         Lesson lesson1 = this.timeTables.get(new LessonKey(day, order)).get(k);
         return lesson.getSubject().getName().equals(lesson1.getSubject().getName());
     }
@@ -549,9 +581,18 @@ public class TimeTableScheduler {
                 if (tempLesson.getSubject().getName().equals(subjectName)) {
                     continue;
                 }
+
                 // tránh những môn tiết cuối
                 if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
                         || (replaceOrder == TimeTableConstants.LAST_ORDER && tempLesson.getSubject().getAvoidLastLesson())) {
+                    continue;
+                }
+
+                // tránh gv có con nhỏ hoặc nhà xa dạy tiết 1
+                if (replaceOrder == TimeTableConstants.FIRST_ORDER && (tempLesson.getTeacher().getHasChildren() || tempLesson.getTeacher().getHasFarfromHome())){
+                    continue;
+                }
+                if ((lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()) && order == TimeTableConstants.FIRST_ORDER){
                     continue;
                 }
                 // môn sinh, địa, thể dục, ... không học 2 ngày liên tiếp

@@ -66,12 +66,12 @@ insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (37,'
 
 
 -- dữ liệu bảng subjects
-insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (1,'Toán',null,2,1,0,'Toán', 0);
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (1,'Toán',null,0,1,0,'Toán', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (2,'Tin',1,2,0,1,'Tin', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (3,'Anh',null,0,1,1,'Anh', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (4,'Sinh',null,0,1,1,'Sinh', 0);
 
-insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (5,'Văn',null,2,1,0,'Văn', 0);
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (5,'Văn',null,0,1,0,'Văn', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (6,'Sử',null,0,0,1,'Sử', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (7,'Địa',null,0,1,1,'Địa', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (8,'Công nghệ',null,0,0,1,'Công nghệ', 0);
@@ -90,7 +90,7 @@ insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spac
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (18,'VănKT',null,2,1,0,'VănKT', 0);
 
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (19,'Nghỉ',null,0,0,0,'Nghỉ', 0);
-
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (20,'ToánKT',null,0,1,0,'ToánKT', 0);
 -- dữ liệu thời khóa biểu của các lớp
 
 --6A
@@ -430,3 +430,14 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (282, 35, 20, 14, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (283, 36, 20, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (284, 35, 20, 16, 2);
+
+-- insert dữ liệu bảng available_teaching_day
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('1', '3');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('1', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '2');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '4');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('22', '6');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('22', '4');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('10', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('10', '7');
