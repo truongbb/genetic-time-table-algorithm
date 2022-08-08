@@ -10,7 +10,7 @@ Sắp xếp thời khóa biểu thỏa mãn các điều kiện:
 ### 2. Điều kiện làm tốt
 - Trong tuần có một ngày có 2 tiết Văn liên tiếp để làm bài kiểm tra
 - Phân bố đều các môn, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
-  
+- Giảng viên thuê ngoài chỉ dạy được một vài ngày cố định trong tuần
 
 
 - Ưu tiên giáo viên đi học nghỉ T7
