@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/time-table")
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TimeTableController {
@@ -44,7 +44,10 @@ public class TimeTableController {
 
     @PostMapping
     public ResponseEntity<Map<LessonKey, List<Lesson>>> generateTimeTable(@RequestBody TimeTableVm timeTableVm) {
-        return new ResponseEntity<>(timeTableService.generateTable(timeTableVm), HttpStatus.OK);
+        Map<LessonKey, List<Lesson>> result = timeTableService.generateTable(timeTableVm).entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

@@ -7,7 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "TIME_TABLE")
+@Table(name = "TIME_TABLE_CONFIG")
 @Data
 @Builder
 @NoArgsConstructor
