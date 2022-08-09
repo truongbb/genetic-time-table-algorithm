@@ -2,25 +2,29 @@ package com.github.truongbb.timetableschedule.entity;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
+@Data
 @Entity
 @Table(name = "AVAILABLE_TEACHING_DAY")
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@IdClass(AvailableTeachingDayPk.class)
 public class AvailableTeachingDay implements Serializable {
 
     @Id
-    @Column(name = "TEACHER_ID", nullable = false)
-    Long teacherId;
+    @Column(nullable = false)
+    Integer id;
 
-    @Id
+    @JoinColumn(name = "TEACHER_ID")
+    @ManyToOne(targetEntity = Teacher.class)
+    Teacher teacher;
+
     @Column(name = "AVAILABLE_DAY", nullable = false)
     Integer availableDay;
 
