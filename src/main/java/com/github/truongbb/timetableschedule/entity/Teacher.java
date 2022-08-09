@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "TEACHERS")
@@ -36,5 +37,8 @@ public class Teacher implements Serializable {
 
     @Column(name = "HAS_FARFROM_HOME")
     Boolean hasFarfromHome;
+
+//    @OneToMany(targetEntity = AvailableTeachingDay.class, fetch = FetchType.EAGER)
+//    List<AvailableTeachingDay> teachingDays;
 
 }

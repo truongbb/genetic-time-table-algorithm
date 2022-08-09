@@ -12,6 +12,7 @@ public class ClazzRepositoryImpl extends BaseRepository implements ClazzReposito
 
     @Override
     public List<Clazz> getAll() {
+
         return getSession().createQuery("from Clazz", Clazz.class).list();
     }
 

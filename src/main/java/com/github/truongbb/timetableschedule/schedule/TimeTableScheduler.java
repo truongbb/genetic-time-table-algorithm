@@ -3,10 +3,8 @@ package com.github.truongbb.timetableschedule.schedule;
 import com.github.truongbb.timetableschedule.constant.StaticSubject;
 import com.github.truongbb.timetableschedule.constant.TimeTableConstants;
 import com.github.truongbb.timetableschedule.dto.LessonKey;
-import com.github.truongbb.timetableschedule.entity.Clazz;
-import com.github.truongbb.timetableschedule.entity.Lesson;
-import com.github.truongbb.timetableschedule.entity.Subject;
-import com.github.truongbb.timetableschedule.entity.Teacher;
+import com.github.truongbb.timetableschedule.entity.*;
+import com.github.truongbb.timetableschedule.repository.availableTeachingDay.TeachingDayRepository;
 import com.github.truongbb.timetableschedule.repository.clazz.ClazzRepository;
 import com.github.truongbb.timetableschedule.repository.subject.SubjectRepository;
 import com.github.truongbb.timetableschedule.repository.teacher.TeacherRepository;
@@ -25,6 +23,9 @@ import java.util.stream.Collectors;
 public class TimeTableScheduler {
 
     private List<Clazz> clazzes; // toàn bộ lớp học
+    private List<Teacher> teachers; // toàn bộ giáo viên
+    private List<Subject> subjects; // toàn bộ môn học
+    private List<AvailableTeachingDay> availableTeachingDay;
     private Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
     private List<Lesson> waitingTimeTables; // các tiết học chờ xếp lịch (giáo viên được gán vào môn mình dạy và lớp mình dạy, cùng với tổng số tiết cần dạy trong tuần, nhưng chưa được xếp vào ngày nào, tiết nào)
 
@@ -32,14 +33,16 @@ public class TimeTableScheduler {
     private final TeacherRepository teacherRepository;
     private final ClazzRepository clazzRepository;
     private final LessonRepository lessonRepository;
+    private final TeachingDayRepository teachingDayRepository;
 
     private Map<LessonKey, List<Lesson>> bestResultsTimeTable;
 
-    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository) {
+    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository, TeachingDayRepository teachingDayRepository) {
         this.subjectRepository = subjectRepository;
         this.teacherRepository = teacherRepository;
         this.clazzRepository = clazzRepository;
         this.lessonRepository = lessonRepository;
+        this.teachingDayRepository = teachingDayRepository;
     }
 
     public void generateTimeTable() {
@@ -71,6 +74,9 @@ public class TimeTableScheduler {
     private void prepareData() {
         // load all data from DB
         this.clazzes = clazzRepository.getAll();
+        this.subjects = subjectRepository.getAll();
+        this.teachers = teacherRepository.getAll();
+        this.availableTeachingDay = teachingDayRepository.getAll(); 
 
         // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước trong DB)
         this.waitingTimeTables = lessonRepository.getAll();
@@ -325,7 +331,7 @@ public class TimeTableScheduler {
 
     /**
      * Lai ghép - Đánh giá - Chọn lọc
-     *
+     * <p>
      * - Các môn được cấu hình không học tiết cuối (như Thể dục) thì không cho học tiết cuối
      * - Trong tuần có một ngày có 2 tiết Văn liên tiếp, Toán liên tiếp để làm bài kiểm tra
      * - Phân bố đều các môn cần giãn cách, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
@@ -419,7 +425,6 @@ public class TimeTableScheduler {
 
                             // tránh việc khi đổi môn lại thành 1 ngày có 3 tiết như môn Văn khối lớp 9
                             if (lesson.getSubject().getBlockNumber() == 2) {
-//                            if (lesson.getSubject().getName().equals("Văn")) {
                                 int count = 0;
                                 for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
                                     count = countLesson(currentLessonKey.getDay(), reporder, replacementLesson, count);
@@ -430,7 +435,6 @@ public class TimeTableScheduler {
                             }
                             /// ngược lại
                             if (replacementLesson.getSubject().getBlockNumber() == 2) {
-//                            if (replacementLesson.getSubject().getName().equals("Văn")) {
                                 int count = 0;
                                 for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
                                     count = countLesson(day, reporder, lesson, count);
@@ -463,6 +467,7 @@ public class TimeTableScheduler {
             }
         }
     }
+
     private int countLesson(int day, int reporder, Lesson lesson, int count) {
         LessonKey lessonKey1 = new LessonKey(day, reporder);
         List<Lesson> checkExitLesson = this.timeTables.get(lessonKey1);
@@ -574,9 +579,52 @@ public class TimeTableScheduler {
                 if (ObjectUtils.isEmpty(tempLesson)) {
                     continue;
                 }
+
+                // không đổi chỗ 2 môn giống nhau
                 if (tempLesson.getSubject().getName().equals(subjectName)) {
                     continue;
                 }
+
+                // tránh xếp lịch cho những gv ngoài dạy vào những ngày gv đó không đi dạy được
+                // môn được mang đi đổi
+                List<AvailableTeachingDay> availableTeachingDayList1 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(lesson.getTeacher().getId())).collect(Collectors.toList());
+                boolean check1 = false;
+                if (!CollectionUtils.isEmpty(availableTeachingDayList1)){
+                    for (int i = 0; i < availableTeachingDayList1.size(); i++) {
+                        if (day != availableTeachingDayList1.get(i).getAvailableDay()){
+                            continue;
+                        }
+                        check1 = true;
+                    }
+                }
+                //                int finalDay = day;
+//                List<AvailableTeachingDay> teachingDays1 = null;
+//                    teachingDays1 = availableTeachingDayList1.stream().filter(t -> t.getAvailableDay().equals(finalDay)).collect(Collectors.toList());
+//                }
+//                if (CollectionUtils.isEmpty(teachingDays1)){
+//                    continue;
+//                }
+                // môn bị đổi
+//                List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(tempLesson.getTeacher().getId())).collect(Collectors.toList());
+//                boolean check2 = false;
+//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)){
+//                    for (int i = 0; i < availableTeachingDayList2.size(); i++) {
+//                        if (replaceDay != availableTeachingDayList2.get(i).getAvailableDay()){
+//                            continue;
+//                        }
+//                        check2 = true;
+//                    }
+//                }
+                if (!check1){
+                    continue;
+                }
+//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)) {
+//                    List<AvailableTeachingDay> teachingDays2 = availableTeachingDayList2.stream().filter(t -> t.getAvailableDay().equals(replaceDay)).collect(Collectors.toList());
+//
+//                    if (CollectionUtils.isEmpty(teachingDays2)) {
+//                        continue;
+//                    }
+//                }
 
                 // tránh những môn tiết cuối
                 if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
@@ -585,10 +633,10 @@ public class TimeTableScheduler {
                 }
 
                 // tránh gv có con nhỏ hoặc nhà xa dạy tiết 1
-                if (replaceOrder == TimeTableConstants.FIRST_ORDER && (tempLesson.getTeacher().getHasChildren() || tempLesson.getTeacher().getHasFarfromHome())){
+                if (replaceOrder == TimeTableConstants.FIRST_ORDER && (tempLesson.getTeacher().getHasChildren() || tempLesson.getTeacher().getHasFarfromHome())) {
                     continue;
                 }
-                if ((lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()) && order == TimeTableConstants.FIRST_ORDER){
+                if ((lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()) && order == TimeTableConstants.FIRST_ORDER) {
                     continue;
                 }
                 // môn sinh, địa, thể dục, ... không học 2 ngày liên tiếp
@@ -680,6 +728,7 @@ public class TimeTableScheduler {
      * @return
      */
     private boolean checkOffLessonToSwitch(Lesson targetLesson, int replacedOrder, Lesson replacedLesson, int order) {
+//        replacedLesson.getTeacher().getAvailableTeachingDayList();
         return (!targetLesson.getSubject().getAvoidLastLesson() || replacedOrder != TimeTableConstants.LAST_ORDER)
                 && (!replacedLesson.getSubject().getAvoidLastLesson() || order != TimeTableConstants.LAST_ORDER);
     }
