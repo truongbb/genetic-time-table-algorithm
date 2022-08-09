@@ -1,15 +1,16 @@
-package com.github.truongbb.timetableschedule.schedule;
+package com.github.truongbb.timetableschedule.service.timetable;
 
 import com.github.truongbb.timetableschedule.constant.StaticSubject;
 import com.github.truongbb.timetableschedule.constant.TimeTableConstants;
 import com.github.truongbb.timetableschedule.dto.LessonKey;
-import com.github.truongbb.timetableschedule.entity.*;
-import com.github.truongbb.timetableschedule.repository.availableTeachingDay.TeachingDayRepository;
-import com.github.truongbb.timetableschedule.repository.clazz.ClazzRepository;
-import com.github.truongbb.timetableschedule.repository.subject.SubjectRepository;
-import com.github.truongbb.timetableschedule.repository.teacher.TeacherRepository;
-import com.github.truongbb.timetableschedule.repository.timetableconfig.LessonRepository;
-import lombok.Getter;
+import com.github.truongbb.timetableschedule.entity.Clazz;
+import com.github.truongbb.timetableschedule.entity.Lesson;
+import com.github.truongbb.timetableschedule.entity.Subject;
+import com.github.truongbb.timetableschedule.entity.Teacher;
+import com.github.truongbb.timetableschedule.vm.LessonVm;
+import com.github.truongbb.timetableschedule.vm.TimeTableVm;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -19,43 +20,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Getter
-public class TimeTableScheduler {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class TimeTableServiceImpl implements TimeTableService {
 
-    private List<Clazz> clazzes; // toàn bộ lớp học
-    private List<Teacher> teachers; // toàn bộ giáo viên
-    private List<Subject> subjects; // toàn bộ môn học
-    private List<AvailableTeachingDay> availableTeachingDay;
-    private Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
-    private List<Lesson> waitingTimeTables; // các tiết học chờ xếp lịch (giáo viên được gán vào môn mình dạy và lớp mình dạy, cùng với tổng số tiết cần dạy trong tuần, nhưng chưa được xếp vào ngày nào, tiết nào)
+    List<Clazz> clazzes;
+    List<Teacher> teachers;
+    List<Subject> subjects;
+    List<LessonVm> waitingTimeTableTmp;
+    List<Lesson> waitingTimeTables;
 
-    private final SubjectRepository subjectRepository;
-    private final TeacherRepository teacherRepository;
-    private final ClazzRepository clazzRepository;
-    private final LessonRepository lessonRepository;
-    private final TeachingDayRepository teachingDayRepository;
+    Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
+    Map<LessonKey, List<Lesson>> bestResultsTimeTable;
 
-    private Map<LessonKey, List<Lesson>> bestResultsTimeTable;
 
-    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository, TeachingDayRepository teachingDayRepository) {
-        this.subjectRepository = subjectRepository;
-        this.teacherRepository = teacherRepository;
-        this.clazzRepository = clazzRepository;
-        this.lessonRepository = lessonRepository;
-        this.teachingDayRepository = teachingDayRepository;
-    }
-
-    public void generateTimeTable() {
-
-        /**
-         *
-         * 1. khởi tạo quần thể
-         * 2. đánh giá
-         * 3. chọn lọc
-         * 4. lai ghép
-         * 5. đột biến
-         *
-         */
+    @Override
+    public Map<LessonKey, List<Lesson>> generateTable(TimeTableVm timeTableVm) throws IllegalArgumentException {
+        this.initData(timeTableVm);
+        if (!this.validateInputData()) {
+            throw new IllegalArgumentException();
+        }
 
         this.prepareData();
         this.generateBase();
@@ -66,20 +49,61 @@ public class TimeTableScheduler {
 
         this.fineTuning(0, 3);
         this.showOutput(this.bestResultsTimeTable);
+
+        return this.bestResultsTimeTable;
+    }
+
+    private void initData(TimeTableVm timeTableVm) {
+        this.teachers = timeTableVm.getTeachers();
+        this.subjects = timeTableVm.getSubjects();
+        this.clazzes = timeTableVm.getClazzes();
+        this.waitingTimeTableTmp = timeTableVm.getConfigTimeTable();
+    }
+
+    private boolean validateInputData() throws IllegalArgumentException {
+        if (CollectionUtils.isEmpty(this.subjects) || CollectionUtils.isEmpty(this.clazzes) || CollectionUtils.isEmpty(this.teachers) || CollectionUtils.isEmpty(this.waitingTimeTableTmp)) {
+            return false;
+        }
+
+        for (int i = 0; i < this.waitingTimeTableTmp.size(); i++) {
+            LessonVm lessonVm = this.waitingTimeTableTmp.get(i);
+
+            Teacher teacher = this.findTeacherById(lessonVm.getTeacherId());
+            if (!ObjectUtils.isEmpty(teacher)) {
+                throw new IllegalArgumentException();
+            }
+
+            Subject subject = this.findSubjectById(lessonVm.getSubjectId());
+            if (!ObjectUtils.isEmpty(subject)) {
+                throw new IllegalArgumentException();
+            }
+
+            Clazz clazz = this.findClazzById(lessonVm.getClazzId());
+            if (!ObjectUtils.isEmpty(clazz)) {
+                throw new IllegalArgumentException();
+            }
+            this.waitingTimeTables.add(new Lesson(teacher, subject, clazz, lessonVm.getLessonQuantity()));
+        }
+
+        return true;
+    }
+
+    private Teacher findTeacherById(Integer teacherId) {
+        return this.teachers.stream().filter(t -> t.getId().equals(teacherId)).findFirst().orElse(null);
+    }
+
+    private Subject findSubjectById(Integer subjectId) {
+        return this.subjects.stream().filter(s -> s.getId().equals(subjectId)).findFirst().orElse(null);
+    }
+
+    private Clazz findClazzById(Integer clazzId) {
+        return this.clazzes.stream().filter(c -> c.getId().equals(clazzId)).findFirst().orElse(null);
     }
 
     /**
      * 0. chuẩn bị dữ liệu
      */
     private void prepareData() {
-        // load all data from DB
-        this.clazzes = clazzRepository.getAll();
-        this.subjects = subjectRepository.getAll();
-        this.teachers = teacherRepository.getAll();
-        this.availableTeachingDay = teachingDayRepository.getAll(); 
-
-        // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước trong DB)
-        this.waitingTimeTables = lessonRepository.getAll();
 
         this.waitingTimeTables.forEach(lesson -> {
             if (ObjectUtils.isEmpty(lesson.getTeacher())) {
@@ -196,9 +220,9 @@ public class TimeTableScheduler {
 
     private void setStaticLesson() {
         // tìm môn chào cờ
-        Subject saluteFlagSubject = subjectRepository.getStaticSubject(StaticSubject.SALUTE_FLAG.value);
+        Subject saluteFlagSubject = this.getStaticSubject(StaticSubject.SALUTE_FLAG.value);
         // tìm môn sinh hoạt lớp
-        Subject classMeetingSubject = subjectRepository.getStaticSubject(StaticSubject.CLASS_MEETING.value);
+        Subject classMeetingSubject = this.getStaticSubject(StaticSubject.CLASS_MEETING.value);
 
         LessonKey saluteFlagLessonKey = new LessonKey(2, 1);// thứ 2, tiết 1
         LessonKey classMeetingLessonKey = new LessonKey(7, 5);// thứ 7, tiết 5
@@ -219,7 +243,7 @@ public class TimeTableScheduler {
             saluteFlagLessons.add(saluteFlagLesson);
 
             // sinh hoạt
-            Teacher headTeacher = teacherRepository.findHeadTeacher(clazz.getName());
+            Teacher headTeacher = this.findHeadTeacher(clazz.getName());
             Lesson classMeetingLesson = Lesson.builder()
                     .clazz(clazz)
                     .subject(classMeetingSubject)
@@ -232,6 +256,14 @@ public class TimeTableScheduler {
         }
         timeTables.put(saluteFlagLessonKey, saluteFlagLessons);// thêm danh sách các tiết chào cờ vào thời khóa biểu
         timeTables.put(classMeetingLessonKey, classMeetingLessons);// thêm danh sách các tiết sinh hoạt lớp vào thời khóa biểu
+    }
+
+    private Teacher findHeadTeacher(String name) {
+        return this.teachers.stream().filter(t -> t.getHeadClazz().getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    private Subject getStaticSubject(String name) {
+        return this.subjects.stream().filter(sub -> sub.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     /**
@@ -425,6 +457,7 @@ public class TimeTableScheduler {
 
                             // tránh việc khi đổi môn lại thành 1 ngày có 3 tiết như môn Văn khối lớp 9
                             if (lesson.getSubject().getBlockNumber() == 2) {
+//                            if (lesson.getSubject().getName().equals("Văn")) {
                                 int count = 0;
                                 for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
                                     count = countLesson(currentLessonKey.getDay(), reporder, replacementLesson, count);
@@ -435,6 +468,7 @@ public class TimeTableScheduler {
                             }
                             /// ngược lại
                             if (replacementLesson.getSubject().getBlockNumber() == 2) {
+//                            if (replacementLesson.getSubject().getName().equals("Văn")) {
                                 int count = 0;
                                 for (int reporder = 1; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
                                     count = countLesson(day, reporder, lesson, count);
@@ -579,52 +613,9 @@ public class TimeTableScheduler {
                 if (ObjectUtils.isEmpty(tempLesson)) {
                     continue;
                 }
-
-                // không đổi chỗ 2 môn giống nhau
                 if (tempLesson.getSubject().getName().equals(subjectName)) {
                     continue;
                 }
-
-                // tránh xếp lịch cho những gv ngoài dạy vào những ngày gv đó không đi dạy được
-                // môn được mang đi đổi
-                List<AvailableTeachingDay> availableTeachingDayList1 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(lesson.getTeacher().getId())).collect(Collectors.toList());
-                boolean check1 = false;
-                if (!CollectionUtils.isEmpty(availableTeachingDayList1)){
-                    for (int i = 0; i < availableTeachingDayList1.size(); i++) {
-                        if (day != availableTeachingDayList1.get(i).getAvailableDay()){
-                            continue;
-                        }
-                        check1 = true;
-                    }
-                }
-                //                int finalDay = day;
-//                List<AvailableTeachingDay> teachingDays1 = null;
-//                    teachingDays1 = availableTeachingDayList1.stream().filter(t -> t.getAvailableDay().equals(finalDay)).collect(Collectors.toList());
-//                }
-//                if (CollectionUtils.isEmpty(teachingDays1)){
-//                    continue;
-//                }
-                // môn bị đổi
-//                List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(tempLesson.getTeacher().getId())).collect(Collectors.toList());
-//                boolean check2 = false;
-//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)){
-//                    for (int i = 0; i < availableTeachingDayList2.size(); i++) {
-//                        if (replaceDay != availableTeachingDayList2.get(i).getAvailableDay()){
-//                            continue;
-//                        }
-//                        check2 = true;
-//                    }
-//                }
-                if (!check1){
-                    continue;
-                }
-//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)) {
-//                    List<AvailableTeachingDay> teachingDays2 = availableTeachingDayList2.stream().filter(t -> t.getAvailableDay().equals(replaceDay)).collect(Collectors.toList());
-//
-//                    if (CollectionUtils.isEmpty(teachingDays2)) {
-//                        continue;
-//                    }
-//                }
 
                 // tránh những môn tiết cuối
                 if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
@@ -728,7 +719,6 @@ public class TimeTableScheduler {
      * @return
      */
     private boolean checkOffLessonToSwitch(Lesson targetLesson, int replacedOrder, Lesson replacedLesson, int order) {
-//        replacedLesson.getTeacher().getAvailableTeachingDayList();
         return (!targetLesson.getSubject().getAvoidLastLesson() || replacedOrder != TimeTableConstants.LAST_ORDER)
                 && (!replacedLesson.getSubject().getAvoidLastLesson() || order != TimeTableConstants.LAST_ORDER);
     }
@@ -757,5 +747,6 @@ public class TimeTableScheduler {
                     System.out.println();
                 });
     }
+
 
 }

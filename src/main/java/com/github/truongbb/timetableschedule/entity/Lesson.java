@@ -40,4 +40,11 @@ public class Lesson implements Serializable {
     @Transient
     boolean isStatic;
 
+    public Lesson(Teacher teacher, Subject subject, Clazz clazz, Integer lessonQuantity) {
+        this.teacher = teacher;
+        this.subject = subject;
+        this.clazz = clazz;
+        this.lessonQuantity = lessonQuantity;
+    }
+
 }
