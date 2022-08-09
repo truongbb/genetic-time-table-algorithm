@@ -76,7 +76,7 @@ public class TimeTableScheduler {
         this.clazzes = clazzRepository.getAll();
         this.subjects = subjectRepository.getAll();
         this.teachers = teacherRepository.getAll();
-        this.availableTeachingDay = teachingDayRepository.getAll(); 
+        this.availableTeachingDay = teachingDayRepository.getAll();
 
         // lấy tất cả data ở bảng time_table (đây là dữ liệu khởi tạo từ trước trong DB)
         this.waitingTimeTables = lessonRepository.getAll();
@@ -460,8 +460,8 @@ public class TimeTableScheduler {
                                 // TODO - file_put_contents()
                             }
                             System.out.println("Lần chạy thứ " + i + " kết quả " + score + ", tốt nhất " + max_score);
+                            this.timeTables = this.bestResultsTimeTable;
                         }
-                        this.timeTables = this.bestResultsTimeTable;
                     }
                 }
             }
@@ -553,6 +553,11 @@ public class TimeTableScheduler {
                         }
                     }
 
+                    // kiểm tra gv xem có bị trùng sau khi đáp ứng được các điều kiện khác không
+                    if (lesson.isTeacherBusy()){
+                        score -= 500;
+                    }
+
                 }
             }
         }
@@ -587,44 +592,53 @@ public class TimeTableScheduler {
 
                 // tránh xếp lịch cho những gv ngoài dạy vào những ngày gv đó không đi dạy được
                 // môn được mang đi đổi
-                List<AvailableTeachingDay> availableTeachingDayList1 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(lesson.getTeacher().getId())).collect(Collectors.toList());
+                List<AvailableTeachingDay> availableTeachingDayList1 = this.availableTeachingDay
+                        .stream()
+                        .filter(t -> t.getTeacher().getId().equals(lesson.getTeacher().getId()))
+                        .collect(Collectors.toList());
                 boolean check1 = false;
-                if (!CollectionUtils.isEmpty(availableTeachingDayList1)){
+                boolean fullTeachDay1 = false;
+                if (!CollectionUtils.isEmpty(availableTeachingDayList1)) {
                     for (int i = 0; i < availableTeachingDayList1.size(); i++) {
-                        if (day != availableTeachingDayList1.get(i).getAvailableDay()){
+                        if (day != availableTeachingDayList1.get(i).getAvailableDay()) {
                             continue;
                         }
                         check1 = true;
+                        //break;
                     }
+                } else {
+                    fullTeachDay1 = true;
                 }
-                //                int finalDay = day;
-//                List<AvailableTeachingDay> teachingDays1 = null;
-//                    teachingDays1 = availableTeachingDayList1.stream().filter(t -> t.getAvailableDay().equals(finalDay)).collect(Collectors.toList());
-//                }
-//                if (CollectionUtils.isEmpty(teachingDays1)){
-//                    continue;
-//                }
-                // môn bị đổi
-//                List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay.stream().filter(t -> t.getTeacher().getId().equals(tempLesson.getTeacher().getId())).collect(Collectors.toList());
-//                boolean check2 = false;
-//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)){
-//                    for (int i = 0; i < availableTeachingDayList2.size(); i++) {
-//                        if (replaceDay != availableTeachingDayList2.get(i).getAvailableDay()){
-//                            continue;
-//                        }
-//                        check2 = true;
-//                    }
-//                }
-                if (!check1){
+                if ((!fullTeachDay1 && !check1)){
                     continue;
                 }
-//                if (!CollectionUtils.isEmpty(availableTeachingDayList2)) {
-//                    List<AvailableTeachingDay> teachingDays2 = availableTeachingDayList2.stream().filter(t -> t.getAvailableDay().equals(replaceDay)).collect(Collectors.toList());
-//
-//                    if (CollectionUtils.isEmpty(teachingDays2)) {
+//                if (!fullTeachDay1){
+//                    if (!check1){
 //                        continue;
 //                    }
 //                }
+                // môn bị đổi
+                List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay
+                        .stream()
+                        .filter(t -> t.getTeacher().getId().equals(tempLesson.getTeacher().getId()))
+                        .collect(Collectors.toList());
+                boolean check2 = false;
+                boolean fullTeachDay2 = false;
+                if (!CollectionUtils.isEmpty(availableTeachingDayList2)) {
+                    for (int i = 0; i < availableTeachingDayList2.size(); i++) {
+                        if (replaceDay != availableTeachingDayList2.get(i).getAvailableDay()) {
+                            continue;
+                        }
+                        check2 = true;
+                        //break;
+                    }
+                } else {
+                    fullTeachDay2 = true;
+                }
+
+                if ((!fullTeachDay2 && !check2)){
+                    continue;
+                }
 
                 // tránh những môn tiết cuối
                 if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
