@@ -27,7 +27,7 @@ public class TimeTableServiceImpl implements TimeTableService {
     List<Teacher> teachers;
     List<Subject> subjects;
     List<LessonVm> waitingTimeTableTmp;
-    List<Lesson> waitingTimeTables;
+    final List<Lesson> waitingTimeTables = new ArrayList<>();
 
     Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
     Map<LessonKey, List<Lesson>> bestResultsTimeTable;
@@ -69,17 +69,17 @@ public class TimeTableServiceImpl implements TimeTableService {
             LessonVm lessonVm = this.waitingTimeTableTmp.get(i);
 
             Teacher teacher = this.findTeacherById(lessonVm.getTeacherId());
-            if (!ObjectUtils.isEmpty(teacher)) {
+            if (ObjectUtils.isEmpty(teacher)) {
                 throw new IllegalArgumentException();
             }
 
             Subject subject = this.findSubjectById(lessonVm.getSubjectId());
-            if (!ObjectUtils.isEmpty(subject)) {
+            if (ObjectUtils.isEmpty(subject)) {
                 throw new IllegalArgumentException();
             }
 
             Clazz clazz = this.findClazzById(lessonVm.getClazzId());
-            if (!ObjectUtils.isEmpty(clazz)) {
+            if (ObjectUtils.isEmpty(clazz)) {
                 throw new IllegalArgumentException();
             }
             this.waitingTimeTables.add(new Lesson(teacher, subject, clazz, lessonVm.getLessonQuantity()));
@@ -259,7 +259,7 @@ public class TimeTableServiceImpl implements TimeTableService {
     }
 
     private Teacher findHeadTeacher(String name) {
-        return this.teachers.stream().filter(t -> t.getHeadClazz().getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+        return this.teachers.stream().filter(t -> !ObjectUtils.isEmpty(t.getHeadClazz()) && t.getHeadClazz().getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     private Subject getStaticSubject(String name) {
@@ -369,7 +369,7 @@ public class TimeTableServiceImpl implements TimeTableService {
      * - Phân bố đều các môn cần giãn cách, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
      */
     private void fineTuning(int from, int to) {
-        //this.bestResultsTimeTable = this.timeTables;
+        this.bestResultsTimeTable = this.timeTables;
         int max_score = -99999999;
         for (int i = from; i < to; i++) {
             for (int day = 2; day <= TimeTableConstants.LAST_DAY; day++) {

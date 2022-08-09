@@ -337,7 +337,7 @@ public class TimeTableScheduler {
      * - Phân bố đều các môn cần giãn cách, ví dụ môn Địa 1 tuần có 2 tiết sẽ có tiết cách ngày
      */
     private void fineTuning(int from, int to) {
-        //this.bestResultsTimeTable = this.timeTables;
+        this.bestResultsTimeTable = this.timeTables;
         int max_score = -99999999;
         for (int i = from; i < to; i++) {
             for (int day = 2; day <= TimeTableConstants.LAST_DAY; day++) {
