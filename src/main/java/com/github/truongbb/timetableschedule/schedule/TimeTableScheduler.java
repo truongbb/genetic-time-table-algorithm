@@ -554,7 +554,7 @@ public class TimeTableScheduler {
                     }
 
                     // kiểm tra gv xem có bị trùng sau khi đáp ứng được các điều kiện khác không
-                    if (lesson.isTeacherBusy()){
+                    if (lesson.isTeacherBusy()) {
                         score -= 500;
                     }
 
@@ -609,7 +609,7 @@ public class TimeTableScheduler {
                 } else {
                     fullTeachDay1 = true;
                 }
-                if ((!fullTeachDay1 && !check1)){
+                if ((!fullTeachDay1 && !check1)) {
                     continue;
                 }
 //                if (!fullTeachDay1){
@@ -636,7 +636,7 @@ public class TimeTableScheduler {
                     fullTeachDay2 = true;
                 }
 
-                if ((!fullTeachDay2 && !check2)){
+                if ((!fullTeachDay2 && !check2)) {
                     continue;
                 }
 
