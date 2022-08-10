@@ -554,8 +554,61 @@ public class TimeTableScheduler {
                     }
 
                     // kiểm tra gv xem có bị trùng sau khi đáp ứng được các điều kiện khác không
-                    if (lesson.isTeacherBusy()){
+                    if (lesson.isTeacherBusy()) {
                         score -= 500;
+                    }
+
+                    // Phân bố đều các môn, ví dụ môn Địa,Sinh... 1 tuần có 2 tiết sẽ có tiết cách ngày
+                    if (lesson.getSubject().getRequireSpacing()) {
+                        boolean checkSpacing = false;
+                        for (int afterDay = day; afterDay <= day + 1; afterDay++) {
+                            for (int afterOrder = TimeTableConstants.FIRST_ORDER; afterOrder < TimeTableConstants.LAST_ORDER; afterOrder++) {
+                                if (afterDay == day && afterOrder == order) {
+                                    continue;
+                                }
+                                List<Lesson> lessonList = this.timeTables.get(new LessonKey(afterDay, afterOrder));
+                                Lesson nextLesson = this.findByClassName(lessonList, lesson.getClazz().getName());
+                                if (nextLesson.getSubject().getName().equals(lesson.getSubject().getName())) {
+                                    checkSpacing = true;
+                                    //break;
+                                }
+                            }
+                            break;
+                        }
+                        if (checkSpacing) {
+                            score -= 100;
+                        } else
+                            score += 100;
+                    }
+
+                    // Giảng viên thuê ngoài chỉ dạy được một vài ngày cố định trong tuần
+                    List<AvailableTeachingDay> availableTeachingDayList = this.availableTeachingDay
+                            .stream()
+                            .filter(t -> t.getTeacher().getId().equals(lesson.getTeacher().getId()))
+                            .collect(Collectors.toList());
+                    boolean checkAvailableTeaching = false;
+                    if (CollectionUtils.isEmpty(availableTeachingDayList)) {
+                        continue;
+                    }
+                    for (int i = 0; i < availableTeachingDayList.size(); i++) {
+                        if (day == availableTeachingDayList.get(i).getAvailableDay()) {
+                            checkAvailableTeaching = true;
+                        }
+                    }
+                    if (checkAvailableTeaching) {
+                        score += 100;
+                    } else {
+                        score -= 100;
+                    }
+
+
+                    // Ưu tiên giáo viên nhà xa, có con nhỏ không dạy tiết 1
+                    if (lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()) {
+                        if (order == TimeTableConstants.FIRST_ORDER) {
+                            score += 50;
+                        } else {
+                            score -= 50;
+                        }
                     }
 
                 }
@@ -609,14 +662,10 @@ public class TimeTableScheduler {
                 } else {
                     fullTeachDay1 = true;
                 }
-                if ((!fullTeachDay1 && !check1)){
+                if ((!fullTeachDay1 && !check1)) {
                     continue;
                 }
-//                if (!fullTeachDay1){
-//                    if (!check1){
-//                        continue;
-//                    }
-//                }
+
                 // môn bị đổi
                 List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay
                         .stream()
@@ -636,7 +685,7 @@ public class TimeTableScheduler {
                     fullTeachDay2 = true;
                 }
 
-                if ((!fullTeachDay2 && !check2)){
+                if ((!fullTeachDay2 && !check2)) {
                     continue;
                 }
 
