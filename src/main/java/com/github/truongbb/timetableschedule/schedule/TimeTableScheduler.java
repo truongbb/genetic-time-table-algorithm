@@ -517,9 +517,9 @@ public class TimeTableScheduler {
                     if (order == TimeTableConstants.LAST_ORDER) {
                         // Môn học tránh tiết cuối
                         if (lesson.getSubject().getAvoidLastLesson()) {
-                            score -= 5;
+                            score -= 200;
                         } else {
-                            score += 5;
+                            score += 200;
                         }
                         // tiết nghỉ ở cuối ngày
                         if (lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)) {
@@ -576,9 +576,9 @@ public class TimeTableScheduler {
                             break;
                         }
                         if (checkSpacing) {
-                            score -= 100;
+                            score -= 200;
                         } else
-                            score += 100;
+                            score += 200;
                     }
 
                     // Giảng viên thuê ngoài chỉ dạy được một vài ngày cố định trong tuần
@@ -605,9 +605,9 @@ public class TimeTableScheduler {
                     // Ưu tiên giáo viên nhà xa, có con nhỏ không dạy tiết 1
                     if (lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()) {
                         if (order == TimeTableConstants.FIRST_ORDER) {
-                            score += 50;
+                            score -= 20;
                         } else {
-                            score -= 50;
+                            score += 20;
                         }
                     }
 
