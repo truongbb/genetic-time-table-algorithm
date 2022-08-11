@@ -9,5 +9,7 @@ public class TimeTableConstants {
     public static final int LAST_DAY = 7;
 
     public static final String OFF_LESSON = "Nghỉ học";
+    public static final String LITERATURE_LESSON = "Văn";
+    public static final String MATH_LESSON = "Toán";
 
 }
