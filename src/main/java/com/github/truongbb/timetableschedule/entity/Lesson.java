@@ -33,12 +33,9 @@ public class Lesson implements Serializable {
 
     @Column(name = "LESSON_QUANTITY", nullable = false)
     Integer lessonQuantity;
-
-    @Transient
-    boolean isTeacherBusy;
-
-    @Transient
-    boolean isStatic;
+//
+//    @Transient
+//    boolean isStatic;
 
     @Transient
     boolean isDuplicated;
