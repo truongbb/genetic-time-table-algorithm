@@ -1,5 +1,6 @@
 package com.github.truongbb.timetableschedule.controller;
 
+import com.github.truongbb.timetableschedule.constant.TimeTableConstants;
 import com.github.truongbb.timetableschedule.dto.LessonKey;
 import com.github.truongbb.timetableschedule.entity.Lesson;
 import com.github.truongbb.timetableschedule.schedule.TimeTableScheduler;
@@ -41,7 +42,8 @@ public class TimeTableController {
                 Lesson l1 = lessons.get(i);
                 for (int j = i + 1; j < lessons.size(); j++) {
                     Lesson l2 = lessons.get(j);
-                    if (!ObjectUtils.isEmpty(l1.getTeacher()) && !ObjectUtils.isEmpty(l2.getTeacher()) && l1.getTeacher().getId().equals(l2.getTeacher().getId())) {
+                    if (!ObjectUtils.isEmpty(l1.getTeacher()) && !ObjectUtils.isEmpty(l2.getTeacher()) && l1.getTeacher().getId().equals(l2.getTeacher().getId())
+                            && !l1.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !l2.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)) {
                         l1.setDuplicated(true);
                         l2.setDuplicated(true);
                     }
