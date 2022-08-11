@@ -35,12 +35,6 @@ public class Lesson implements Serializable {
     Integer lessonQuantity;
 
     @Transient
-    boolean isTeacherBusy;
-
-    @Transient
-    boolean isStatic;
-
-    @Transient
     boolean isDuplicated;
 
     public Lesson(Teacher teacher, Subject subject, Clazz clazz, Integer lessonQuantity) {
