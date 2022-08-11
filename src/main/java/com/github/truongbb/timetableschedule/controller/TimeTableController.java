@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +35,19 @@ public class TimeTableController {
 
     @GetMapping
     public String getTimeTable(ModelMap modelMap) {
+        timeTableScheduler.getBestResultsTimeTable().entrySet().forEach(lessonKeyListEntry -> {
+            List<Lesson> lessons = lessonKeyListEntry.getValue();
+            for (int i = 0; i < lessons.size(); i++) {
+                Lesson l1 = lessons.get(i);
+                for (int j = i + 1; j < lessons.size(); j++) {
+                    Lesson l2 = lessons.get(j);
+                    if (!ObjectUtils.isEmpty(l1.getTeacher()) && !ObjectUtils.isEmpty(l2.getTeacher()) && l1.getTeacher().getId().equals(l2.getTeacher().getId())) {
+                        l1.setDuplicated(true);
+                        l2.setDuplicated(true);
+                    }
+                }
+            }
+        });
         Map<LessonKey, List<Lesson>> result = timeTableScheduler.getTimeTables().entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));

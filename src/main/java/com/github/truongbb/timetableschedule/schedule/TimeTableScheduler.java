@@ -64,7 +64,7 @@ public class TimeTableScheduler {
         this.evolutionToCorrect();
         this.showOutput(this.timeTables);
 
-        this.fineTuning(0, 3);
+        this.fineTuning(0, 10);
         this.showOutput(this.bestResultsTimeTable);
     }
 
@@ -297,7 +297,7 @@ public class TimeTableScheduler {
                 ) {
                     // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
                     if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, lesson.getTeacher())) {
-                        // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch`
+                        // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
                         if (!this.isTeacherBusy(day, order, clazz, busyTeacher)) {
                             return lessonKey;
                         }
@@ -390,10 +390,17 @@ public class TimeTableScheduler {
                             // xử lý đảo
                             List<Lesson> allReplacementLesson = this.timeTables.get(currentLessonKey);
                             Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
+
+                            // nếu tiết tìm được hoặc tiết hiện tại mang đi đổi mà bị trùng tiết giáo viên ==> bỏ qua không đổi
+                            if (this.isTeacherBusy(currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson.getClazz(), lesson.getTeacher())
+                                    || this.isTeacherBusy(day, order, replacementLesson.getClazz(), replacementLesson.getTeacher())) {
+                                continue;
+                            }
+
                             replacementLesson.setTeacherBusy(false);
                             lesson.setTeacherBusy(false);
 
-                            // đổi lịch môn nghỉ
+                            // tiết nghỉ
                             if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && currentLessonKey.getOrder() != TimeTableConstants.LAST_ORDER)
                                     || (replacementLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && order != TimeTableConstants.LAST_ORDER)) {
                                 continue;
@@ -612,11 +619,6 @@ public class TimeTableScheduler {
                 if ((!fullTeachDay1 && !check1)) {
                     continue;
                 }
-//                if (!fullTeachDay1){
-//                    if (!check1){
-//                        continue;
-//                    }
-//                }
                 // môn bị đổi
                 List<AvailableTeachingDay> availableTeachingDayList2 = this.availableTeachingDay
                         .stream()
@@ -637,12 +639,6 @@ public class TimeTableScheduler {
                 }
 
                 if ((!fullTeachDay2 && !check2)) {
-                    continue;
-                }
-
-                // tránh những môn tiết cuối
-                if ((lesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
-                        || (replaceOrder == TimeTableConstants.LAST_ORDER && tempLesson.getSubject().getAvoidLastLesson())) {
                     continue;
                 }
 
@@ -713,38 +709,19 @@ public class TimeTableScheduler {
                     }
                 }
 
-                if (this.checkOffLessonToSwitch(tempLesson, replaceOrder, lesson, order)) {
-                    // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
-                    if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, tempLesson.getTeacher())) {
-                        // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                        if (!this.isTeacherBusy(day, order, clazz, busyTeacher)) {
-                            if (CollectionUtils.isEmpty(result)) {
-                                result = new ArrayList<>();
-                            }
-                            result.add(new LessonKey(day, order));
+                // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
+                if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, tempLesson.getTeacher())) {
+                    // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
+                    if (!this.isTeacherBusy(day, order, clazz, busyTeacher)) {
+                        if (CollectionUtils.isEmpty(result)) {
+                            result = new ArrayList<>();
                         }
+                        result.add(new LessonKey(day, order));
                     }
                 }
             }
         }
         return result;
-    }
-
-    /**
-     * kiểm tra các điều kiện của môn đổi và môn bị đổi:
-     * - tiết nghỉ phải là tiết cuối ngày
-     * - các môn học tránh tiết cuối không để ở cuối
-     *
-     * @param targetLesson   môn học được đổi
-     * @param replacedOrder  ví trí bị đổi
-     * @param replacedLesson môn học bị đổi
-     * @param order          vị trí được đổi
-     * @return
-     */
-    private boolean checkOffLessonToSwitch(Lesson targetLesson, int replacedOrder, Lesson replacedLesson, int order) {
-//        replacedLesson.getTeacher().getAvailableTeachingDayList();
-        return (!targetLesson.getSubject().getAvoidLastLesson() || replacedOrder != TimeTableConstants.LAST_ORDER)
-                && (!replacedLesson.getSubject().getAvoidLastLesson() || order != TimeTableConstants.LAST_ORDER);
     }
 
     private void showOutput(Map<LessonKey, List<Lesson>> mapData) {

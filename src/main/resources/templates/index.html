@@ -23,9 +23,9 @@
             th:text="${lesson.key.getOrder()}" style="width: 20px"></td>
         <td th:each="l: ${lesson.value}"
             th:class="${lesson.key.getDay() % 2 == 0} ? 'bg-gray'  : ''">
-            <span style="font-weight: bold" th:text=" | ${l.getSubject().getName()}"></span>
+            <span style="font-weight: bold" th:text=" | ${l.getSubject().getName()}" th:class="${l.isDuplicated()} ? 'text-red' : ''"></span>
             <br/>
-            <span th:text="${l.getTeacher() != null ? l.getTeacher().getName(): ''}"></span>
+            <span th:text="${l.getTeacher() != null ? l.getTeacher().getName(): ''}" th:class="${l.isDuplicated()} ? 'text-red' : ''"></span>
         </td>
     </tr>
 </table>
