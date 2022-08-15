@@ -579,7 +579,7 @@ public class TimeTableScheduler {
         Clazz clazz = replacedLesson.getClazz();
         Teacher busyTeacher = replacedLesson.getTeacher();
         List<LessonKey> result = null;
-        for (int day = replacedDay; day <= TimeTableConstants.LAST_DAY; day++) {
+        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
                 Lesson tempLesson = this.findLessonByKeyAndClass(day, order, replacedLesson.getClazz().getName());
                 if (this.isIgnoreCases(day, order, replacedLesson, replacedDay, replacedOrder, tempLesson)) {
@@ -668,7 +668,8 @@ public class TimeTableScheduler {
     }
 
     private void showOutput(Map<LessonKey, List<Lesson>> mapData) {
-        System.out.println("\t\t\t\t\t\t\t 6A \t\t\t\t\t\t\t\t 6B \t\t\t\t\t\t\t\t\t\t 6C \t\t\t\t\t\t\t\t 6D \t\t\t\t\t\t\t\t\t 7A \t\t\t\t\t\t\t\t\t 7B \t\t\t\t\t\t\t\t\t 7C \t\t\t\t\t\t\t\t\t 7D \t\t\t\t\t\t\t\t\t 8A \t\t\t\t\t\t\t\t\t 8B \t\t\t\t\t\t\t\t\t 8C \t\t\t\t\t\t\t\t\t 8D \t\t\t\t\t\t\t\t\t 9A \t\t\t\t\t\t\t\t\t 9B \t\t\t\t\t\t\t\t\t 9C \t\t\t\t\t\t\t\t\t 9D");
+        this.clazzes.forEach(c -> System.out.print("\t\t\t\t\t\t\t " + c.getName() + " "));
+        System.out.println();
         mapData
                 .entrySet()
                 .stream()

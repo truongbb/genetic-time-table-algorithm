@@ -35,7 +35,7 @@ create table teachers
     skip_days     nvarchar2(2000),
     head_clazz_id number,
     has_farfrom_home number(1,0) default 0 not null,
-    constraint fk_teacher_clazz foreign key (clazz_id) references clazz (id)
+    constraint fk_teacher_clazz foreign key (head_clazz_id) references clazz (id)
 );
 
 -- các ngày giáo viên đăng ký dạy
