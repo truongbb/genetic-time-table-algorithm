@@ -596,9 +596,9 @@ public class TimeTableScheduler {
         if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
             return true;
         }
-//        if (replacedDay == day && order <= replacedOrder) { // không đổi môn đã sắp xếp trước đó của lớp đó
-//            return true;
-//        }
+        if (replacedDay == day && order == replacedOrder) {
+            return true;
+        }
         String subjectName = replacedLesson.getSubject().getName();
         if (ObjectUtils.isEmpty(tempLesson)) {
             return true;
