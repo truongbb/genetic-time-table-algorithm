@@ -314,30 +314,10 @@ public class TimeTableScheduler {
 
                         // những môn đã có 2 tiết liền nhau không được đổi nữa: VănKT, Toán, tin...
                         // trường hợp môn được đổi
-                        if (lesson.getSubject().getBlockNumber() == 2) {
-                            boolean checkSub1 = false;
-                            boolean checkSub2 = false;
-
-                            if (order < 3) {
-                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, k);
-                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, k);
-
-                            } else {
-                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, k);
-                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order - 2, lesson, k);
-
-                            }
-                            if (checkSub1 && !checkSub2) {
-                                continue;
-                            }
-                            if (order != 1 && order != 5) {
-                                checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, k);
-                                checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, k);
-                            }
-                            if ((checkSub1 && !checkSub2) || (!checkSub1 && checkSub2)) {
-                                continue;
-                            }
+                        if (this.checkBlockSubject(lesson, day, order, k)) {
+                            continue;
                         }
+
                         List<LessonKey> allReplacement = this.findAllReplacement(day, order, lesson);
                         if (ObjectUtils.isEmpty(allReplacement)) {
                             continue;
@@ -359,38 +339,13 @@ public class TimeTableScheduler {
                             }
 
                             // Trường hợp ngược lại môn bị đổi: môn đã có hai tiết liền nhau
-                            if (replacementLesson.getSubject().getBlockNumber() == 2) {
-                                boolean checkSub1 = false;
-                                boolean checkSub2 = false;
-                                if (currentLessonKey.getOrder() < 3) {
-                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 1, replacementLesson, k);
-                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 2, replacementLesson, k);
-
-                                } else {
-                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 1, replacementLesson, k);
-                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 2, replacementLesson, k);
-                                }
-                                if (checkSub1 && !checkSub2) {
-                                    continue;
-                                }
-                                if (currentLessonKey.getOrder() != 1 && currentLessonKey.getOrder() != 5) {
-                                    checkSub1 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() - 1, replacementLesson, k);
-                                    checkSub2 = checkAdjacentLessonBeforeReplace(currentLessonKey.getDay(), currentLessonKey.getOrder() + 1, replacementLesson, k);
-                                }
-                                if ((checkSub1 && !checkSub2) || (!checkSub1 && checkSub2)) {
-                                    continue;
-                                }
+                            if (this.checkBlockSubject(replacementLesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), k)) {
+                                continue;
                             }
 
-                            // tránh 1 ngày có cả Văn và 2 VănKT, Toán và 2 ToánKT (3 tiết văn hoặc toán)
-                            if (this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), TimeTableConstants.LITERATURE_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order, TimeTableConstants.LITERATURE_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), TimeTableConstants.MATH_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order, TimeTableConstants.MATH_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), TimeTableConstants.KHTN_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order, TimeTableConstants.KHTN_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), TimeTableConstants.ENGLISH_LESSON)
-                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order, TimeTableConstants.ENGLISH_LESSON)) {
+                            // tránh 1 ngày có cả Văn và 2 VănKT, Toán và 2 ToánKT (3 tiết văn hoặc toán), ... đối với các môn có từ 4 tiết 1 tuần trở lên
+                            if (this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
+                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order)) {
                                 continue;
                             }
 
@@ -417,11 +372,10 @@ public class TimeTableScheduler {
                             // nếu kết quả tốt hơn thì lưu kết quả tốt nhất
                             if (max_score < score) {
                                 max_score = score;
-                                this.bestResultsTimeTable = this.timeTables;
-                                // TODO - file_put_contents()
+                                this.bestResultsTimeTable = this.saveBestResult(this.timeTables);
                             }
                             System.out.println("Lần chạy thứ " + i + " kết quả " + score + ", tốt nhất " + max_score);
-                            this.timeTables = this.bestResultsTimeTable;
+                            this.timeTables = this.saveBestResult(this.bestResultsTimeTable);
                         }
                     }
                 }
@@ -429,8 +383,43 @@ public class TimeTableScheduler {
         }
     }
 
-    private boolean checkTripleLessonInTheSameDay(Lesson lesson, int day, int order, String subjectName) {
-        if (!lesson.getSubject().getName().startsWith(subjectName)) {
+    private boolean checkBlockSubject(Lesson lesson, int day, int order, int index) {
+        if (lesson.getSubject().getBlockNumber() != 2) {
+            return false;
+        }
+        boolean checkSub1 = false;
+        boolean checkSub2 = false;
+        if (order < 3) {
+            checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
+            checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, index);
+
+        } else {
+            checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
+            checkSub2 = checkAdjacentLessonBeforeReplace(day, order - 2, lesson, index);
+        }
+        if (checkSub1 && !checkSub2) {
+            return true;
+        }
+        if (order != 1 && order != 5) {
+            checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
+            checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
+        }
+        return (checkSub1 && !checkSub2) || (!checkSub1 && checkSub2);
+    }
+
+    private Map<LessonKey, List<Lesson>> saveBestResult(Map<LessonKey, List<Lesson>> data) {
+        if (ObjectUtils.isEmpty(data) || data.isEmpty()) {
+            return null;
+        }
+        return data.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private boolean checkTripleLessonInTheSameDay(Lesson lesson, int day, int order) {
+        String subName = lesson.getSubject().getName();
+        String mainSubjName = TimeTableConstants.MAIN_LESSONS.stream().filter(l -> l.equalsIgnoreCase(subName) || l.startsWith(subName)).findFirst().orElse(null);
+        if (StringUtils.isEmpty(mainSubjName)) {
             return false;
         }
         int count = 0;
@@ -439,7 +428,8 @@ public class TimeTableScheduler {
                 continue;
             }
             Lesson tempLesson = this.findLessonByKeyAndClass(day, reporder, lesson.getClazz().getName());
-            if (tempLesson.getSubject().getName().startsWith(subjectName) && lesson.getSubject().getName().startsWith(subjectName)) {
+            if ((tempLesson.getSubject().getName().startsWith(mainSubjName) && lesson.getSubject().getName().startsWith(mainSubjName))
+                    || (tempLesson.getSubject().getName().equalsIgnoreCase(mainSubjName) && lesson.getSubject().getName().equalsIgnoreCase(mainSubjName))) {
                 count++;
             }
         }
@@ -626,9 +616,6 @@ public class TimeTableScheduler {
         if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
             return true;
         }
-//        if (replacedDay == day && order <= replacedOrder) { // không đổi môn đã sắp xếp trước đó của lớp đó
-//            return true;
-//        }
 
         if (replacedDay == day && order == replacedOrder) {
             return true;
