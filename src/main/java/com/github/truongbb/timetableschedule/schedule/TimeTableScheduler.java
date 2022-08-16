@@ -327,9 +327,8 @@ public class TimeTableScheduler {
                             List<Lesson> allReplacementLesson = this.timeTables.get(currentLessonKey);
                             Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
 
-                            if (lesson.getSubject().getName().equals("Vật Lý") && replacementLesson.getSubject().getName().equals("Vật Lý")
-                                    && replacementLesson.getClazz().getName().equals("10A2")) {
-                                System.out.println(i);
+                            if (lesson.getSubject().getName().equals(replacementLesson.getSubject().getName())){
+                                continue;
                             }
 
                             // nếu tiết tìm được hoặc tiết hiện tại mang đi đổi mà bị trùng tiết giáo viên ==> bỏ qua không đổi
@@ -389,6 +388,8 @@ public class TimeTableScheduler {
         }
         boolean checkSub1 = false;
         boolean checkSub2 = false;
+        boolean checkSub3 = false;
+        boolean checkSub4 = false;
         if (order < 3) {
             checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
             checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, index);
@@ -401,10 +402,18 @@ public class TimeTableScheduler {
             return true;
         }
         if (order != 1 && order != 5) {
-            checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
-            checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
+            checkSub3 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
+            checkSub4 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
         }
-        return (checkSub1 && !checkSub2) || (!checkSub1 && checkSub2);
+        if ((checkSub3 && !checkSub4) || (!checkSub3 && checkSub4)){
+            if (checkSub1 && checkSub2){
+                return false;
+            }
+            if (!checkSub1 && checkSub2){
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<LessonKey, List<Lesson>> saveBestResult(Map<LessonKey, List<Lesson>> data) {
@@ -566,14 +575,6 @@ public class TimeTableScheduler {
                         }
                     }
 
-                    // một ngày có 3 tiết học giống nhau: Toán, Văn, T.Anh, KHTN
-                    if (this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.LITERATURE_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.ENGLISH_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.MATH_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.KHTN_LESSON)) {
-                        score -= 200;
-                    }
-
                 }
             }
         }
@@ -587,12 +588,6 @@ public class TimeTableScheduler {
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
                 Lesson tempLesson = this.findLessonByKeyAndClass(day, order, replacedLesson.getClazz().getName());
-
-                if (replacedLesson.getSubject().getName().equals("Vật Lý") && tempLesson.getSubject().getName().equals("Vật Lý")
-                        && replacedLesson.getClazz().getName().equals("10A2")) {
-                    //System.out.println(i);
-                    continue;
-                }
 
                 if (this.isIgnoreCases(day, order, replacedLesson, replacedDay, replacedOrder, tempLesson)) {
                     continue;
