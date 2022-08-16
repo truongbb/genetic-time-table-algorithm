@@ -1,5 +1,8 @@
 package com.github.truongbb.timetableschedule.constant;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class TimeTableConstants {
 
     public static final int FIRST_ORDER = 1;
@@ -9,8 +12,7 @@ public class TimeTableConstants {
     public static final int LAST_DAY = 7;
 
     public static final String OFF_LESSON = "Nghỉ học";
-    public static final String LITERATURE_LESSON = "Văn";
-    public static final String MATH_LESSON = "Toán";
-    public static final String KHTN_LESSON = "KHTN";
+
+    public static final List<String> MAIN_LESSONS = Arrays.asList("Văn", "Toán", "KHTN", "Tiếng Anh");
 
 }
