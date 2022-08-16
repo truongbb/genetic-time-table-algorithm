@@ -12,5 +12,6 @@ public class TimeTableConstants {
     public static final String LITERATURE_LESSON = "Văn";
     public static final String MATH_LESSON = "Toán";
     public static final String KHTN_LESSON = "KHTN";
+    public static final String ENGLISH_LESSON = "T.Anh";
 
 }
