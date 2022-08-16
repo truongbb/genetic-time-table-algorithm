@@ -38,7 +38,8 @@ public class TimeTableScheduler {
 
     private Map<LessonKey, List<Lesson>> bestResultsTimeTable;
 
-    private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = new HashMap<>();
+//    private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = new HashMap<>();
+    private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = null;
 
     public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository, TeachingDayRepository teachingDayRepository) {
         this.subjectRepository = subjectRepository;
@@ -47,9 +48,9 @@ public class TimeTableScheduler {
         this.lessonRepository = lessonRepository;
         this.teachingDayRepository = teachingDayRepository;
 
-        OFF_LESSONS_CONFIG.put("10", Arrays.asList(new OffLessonConfig(3, 4), new OffLessonConfig(3, 5), new OffLessonConfig(5, 5)));
-        OFF_LESSONS_CONFIG.put("11", Arrays.asList(new OffLessonConfig(3, 5), new OffLessonConfig(5, 5), new OffLessonConfig( 6, 5)));
-        OFF_LESSONS_CONFIG.put("12", Arrays.asList(new OffLessonConfig(2, 5), new OffLessonConfig(6, 5)));
+//        OFF_LESSONS_CONFIG.put("10", Arrays.asList(new OffLessonConfig(3, 4), new OffLessonConfig(3, 5), new OffLessonConfig(5, 5)));
+//        OFF_LESSONS_CONFIG.put("11", Arrays.asList(new OffLessonConfig(3, 5), new OffLessonConfig(5, 5), new OffLessonConfig(6, 5)));
+//        OFF_LESSONS_CONFIG.put("12", Arrays.asList(new OffLessonConfig(2, 5), new OffLessonConfig(6, 5)));
 //        OFF_LESSONS_CONFIG.put("9", Arrays.asList(new OffLessonConfig(2, 5), new OffLessonConfig(6, 5)));
 
     }
@@ -170,10 +171,6 @@ public class TimeTableScheduler {
     private boolean isCCOrSH(int day, int order) {
         return (day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
                 (day == TimeTableConstants.LAST_DAY && order == TimeTableConstants.LAST_ORDER);
-    }
-
-    private boolean isOffLesson(Lesson lesson) {
-        return !ObjectUtils.isEmpty(lesson) && lesson.getSubject().getName().equalsIgnoreCase(TimeTableConstants.OFF_LESSON);
     }
 
     private Lesson findLessonByKeyAndClass(int day, int order, String className) {
@@ -372,7 +369,8 @@ public class TimeTableScheduler {
                             List<Lesson> allReplacementLesson = this.timeTables.get(currentLessonKey);
                             Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
 
-                            if (lesson.getSubject().getName().equals(replacementLesson.getSubject().getName())){
+                            // cùng 1 môn không cần đổi
+                            if (lesson.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
                                 continue;
                             }
 
@@ -450,11 +448,11 @@ public class TimeTableScheduler {
             checkSub3 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
             checkSub4 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
         }
-        if ((checkSub3 && !checkSub4) || (!checkSub3 && checkSub4)){
-            if (checkSub1 && checkSub2){
+        if ((checkSub3 && !checkSub4) || (!checkSub3 && checkSub4)) {
+            if (checkSub1 && checkSub2) {
                 return false;
             }
-            if (!checkSub1 && checkSub2){
+            if (!checkSub1 && checkSub2) {
                 return true;
             }
         }
@@ -552,7 +550,7 @@ public class TimeTableScheduler {
                         score -= 100;
                     }
                     // Môn học block nhưng nó lại không liền
-                    if (lesson.getSubject().getBlockNumber() > 1) {
+                    if (lesson.getSubject().getBlockNumber() == 2) {
 
                         // kiểm tra tiết trước
                         boolean before = false;
