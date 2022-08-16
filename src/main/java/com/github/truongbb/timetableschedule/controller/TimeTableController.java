@@ -36,8 +36,7 @@ public class TimeTableController {
 
     @GetMapping
     public String getTimeTable(ModelMap modelMap) {
-        timeTableScheduler.getBestResultsTimeTable().entrySet().forEach(lessonKeyListEntry -> {
-            List<Lesson> lessons = lessonKeyListEntry.getValue();
+        timeTableScheduler.getBestResultsTimeTable().forEach((key, lessons) -> {
             for (int i = 0; i < lessons.size(); i++) {
                 Lesson l1 = lessons.get(i);
                 for (int j = i + 1; j < lessons.size(); j++) {
@@ -50,7 +49,7 @@ public class TimeTableController {
                 }
             }
         });
-        Map<LessonKey, List<Lesson>> result = timeTableScheduler.getTimeTables().entrySet()
+        Map<LessonKey, List<Lesson>> result = timeTableScheduler.getBestResultsTimeTable().entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         modelMap.addAttribute("timeTables", result);

@@ -9,7 +9,8 @@ create table labs
 create table clazz
 (
     id   int primary key,
-    name nvarchar2(500) not null
+    name nvarchar2(500) not null,
+    grade nvarchar2(50) not null
 );
 
 -- môn học

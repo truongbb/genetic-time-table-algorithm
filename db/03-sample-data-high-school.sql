@@ -5,35 +5,35 @@ insert into labs(id, name) VALUES (2,'Phòng tin 2');
 insert into labs(id, name) VALUES (3,'Phòng tin 3');
 
 -- dữ liệu bảng lớp học
-insert into clazz(id, name) VALUES (1,'10A1');
-insert into clazz(id, name) VALUES (2,'10A2');
-insert into clazz(id, name) VALUES (3,'10A3');
-insert into clazz(id, name) VALUES (4,'10A4');
-insert into clazz(id, name) VALUES (5,'10A5');
-insert into clazz(id, name) VALUES (6,'10A6');
-insert into clazz(id, name) VALUES (7,'10A7');
-insert into clazz(id, name) VALUES (8,'10A8');
-insert into clazz(id, name) VALUES (9,'10A9');
-insert into clazz(id, name) VALUES (10,'10B');
+insert into clazz(id, name, grade) VALUES (1,'10A1', '10');
+insert into clazz(id, name, grade) VALUES (2,'10A2', '10');
+insert into clazz(id, name, grade) VALUES (3,'10A3', '10');
+insert into clazz(id, name, grade) VALUES (4,'10A4', '10');
+insert into clazz(id, name, grade) VALUES (5,'10A5', '10');
+insert into clazz(id, name, grade) VALUES (6,'10A6', '10');
+insert into clazz(id, name, grade) VALUES (7,'10A7', '10');
+insert into clazz(id, name, grade) VALUES (8,'10A8', '10');
+insert into clazz(id, name, grade) VALUES (9,'10A9', '10');
+insert into clazz(id, name, grade) VALUES (10,'10B', '10');
 
 
-insert into clazz(id, name) VALUES (11,'11A1');
-insert into clazz(id, name) VALUES (12,'11A2');
-insert into clazz(id, name) VALUES (13,'11A3');
-insert into clazz(id, name) VALUES (14,'11A4');
-insert into clazz(id, name) VALUES (15,'11A5');
-insert into clazz(id, name) VALUES (16,'11A6');
-insert into clazz(id, name) VALUES (17,'11A7');
-insert into clazz(id, name) VALUES (18,'11A8');
+insert into clazz(id, name, grade) VALUES (11,'11A1', '11');
+insert into clazz(id, name, grade) VALUES (12,'11A2', '11');
+insert into clazz(id, name, grade) VALUES (13,'11A3', '11');
+insert into clazz(id, name, grade) VALUES (14,'11A4', '11');
+insert into clazz(id, name, grade) VALUES (15,'11A5', '11');
+insert into clazz(id, name, grade) VALUES (16,'11A6', '11');
+insert into clazz(id, name, grade) VALUES (17,'11A7', '11');
+insert into clazz(id, name, grade) VALUES (18,'11A8', '11');
 
-insert into clazz(id, name) VALUES (19,'12A1');
-insert into clazz(id, name) VALUES (20,'12A2');
-insert into clazz(id, name) VALUES (21,'12A3');
-insert into clazz(id, name) VALUES (22,'12A4');
-insert into clazz(id, name) VALUES (23,'12A5');
-insert into clazz(id, name) VALUES (24,'12A6');
-insert into clazz(id, name) VALUES (25,'12A7');
-insert into clazz(id, name) VALUES (26,'12A8');
+insert into clazz(id, name, grade) VALUES (19,'12A1', '12');
+insert into clazz(id, name, grade) VALUES (20,'12A2', '12');
+insert into clazz(id, name, grade) VALUES (21,'12A3', '12');
+insert into clazz(id, name, grade) VALUES (22,'12A4', '12');
+insert into clazz(id, name, grade) VALUES (23,'12A5', '12');
+insert into clazz(id, name, grade) VALUES (24,'12A6', '12');
+insert into clazz(id, name, grade) VALUES (25,'12A7', '12');
+insert into clazz(id, name, grade) VALUES (26,'12A8', '12');
 
 -- dữ liệu bảng giáo viên
 insert into teachers(id, name,has_children,skip_days,head_clazz_id,has_farfrom_home) VALUES (1,'Trùng',1,null,1,0);

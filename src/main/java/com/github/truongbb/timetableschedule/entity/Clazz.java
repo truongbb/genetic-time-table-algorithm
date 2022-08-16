@@ -27,4 +27,7 @@ public class Clazz implements Serializable {
     @Column(nullable = false)
     String name;
 
+    @Column(nullable = false)
+    String grade;
+
 }
