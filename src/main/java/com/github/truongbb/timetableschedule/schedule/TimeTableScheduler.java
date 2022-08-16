@@ -567,10 +567,7 @@ public class TimeTableScheduler {
                     }
 
                     // một ngày có 3 tiết học giống nhau: Toán, Văn, T.Anh, KHTN
-                    if (this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.LITERATURE_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.ENGLISH_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.MATH_LESSON)
-                            || this.checkTripleLessonInTheSameDay(lesson, day, order, TimeTableConstants.KHTN_LESSON)) {
+                    if (this.checkTripleLessonInTheSameDay(lesson, day, order)) {
                         score -= 200;
                     }
 
