@@ -20,7 +20,7 @@ spring:
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: jdbc:oracle:thin:@localhost:1521:xe
-    username: time_table_schedule
+    username: high_school_time_table
     password: admin
     dbcp2:
       test-while-idle: true
