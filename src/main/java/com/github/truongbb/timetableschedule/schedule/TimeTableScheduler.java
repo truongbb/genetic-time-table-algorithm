@@ -372,6 +372,10 @@ public class TimeTableScheduler {
                             List<Lesson> allReplacementLesson = this.timeTables.get(currentLessonKey);
                             Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
 
+                            if (lesson.getSubject().getName().equals(replacementLesson.getSubject().getName())){
+                                continue;
+                            }
+
                             // nếu tiết tìm được hoặc tiết hiện tại mang đi đổi mà bị trùng tiết giáo viên ==> bỏ qua không đổi
                             if (this.isTeacherBusy(currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson.getClazz(), lesson.getTeacher())
                                     || this.isTeacherBusy(day, order, replacementLesson.getClazz(), replacementLesson.getTeacher())) {
@@ -429,6 +433,8 @@ public class TimeTableScheduler {
         }
         boolean checkSub1 = false;
         boolean checkSub2 = false;
+        boolean checkSub3 = false;
+        boolean checkSub4 = false;
         if (order < 3) {
             checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
             checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, index);
@@ -441,10 +447,18 @@ public class TimeTableScheduler {
             return true;
         }
         if (order != 1 && order != 5) {
-            checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
-            checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
+            checkSub3 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
+            checkSub4 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
         }
-        return (checkSub1 && !checkSub2) || (!checkSub1 && checkSub2);
+        if ((checkSub3 && !checkSub4) || (!checkSub3 && checkSub4)){
+            if (checkSub1 && checkSub2){
+                return false;
+            }
+            if (!checkSub1 && checkSub2){
+                return true;
+            }
+        }
+        return false;
     }
 
     private Map<LessonKey, List<Lesson>> saveBestResult(Map<LessonKey, List<Lesson>> data) {
@@ -624,6 +638,7 @@ public class TimeTableScheduler {
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
                 Lesson tempLesson = this.findLessonByKeyAndClass(day, order, replacedLesson.getClazz().getName());
+
                 if (this.isIgnoreCases(day, order, replacedLesson, replacedDay, replacedOrder, tempLesson)) {
                     continue;
                 }
