@@ -1,5 +1,6 @@
 package com.github.truongbb.timetableschedule.vm;
 
+import com.github.truongbb.timetableschedule.dto.OffLessonConfig;
 import com.github.truongbb.timetableschedule.entity.Clazz;
 import com.github.truongbb.timetableschedule.entity.Subject;
 import com.github.truongbb.timetableschedule.entity.Teacher;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -21,5 +23,9 @@ public class TimeTableVm {
     List<Subject> subjects;
     List<Clazz> clazzes;
     List<LessonVm> configTimeTable;
+    Map<String, List<OffLessonConfig>> offLessonConfig;
+    List<AvailableTeachingDayVm> availableTeachingDay;
+
+    Integer generationNum;
 
 }
