@@ -28,7 +28,7 @@ public class TimeTableServiceImpl implements TimeTableService {
     List<Clazz> clazzes;
     List<Teacher> teachers;
     List<Subject> subjects;
-    List<AvailableTeachingDay> availableTeachingDay = new ArrayList<>();
+    final List<AvailableTeachingDay> availableTeachingDay = new ArrayList<>();
     List<LessonVm> waitingTimeTableTmp;
     final List<Lesson> waitingTimeTables = new ArrayList<>();
 
@@ -107,7 +107,6 @@ public class TimeTableServiceImpl implements TimeTableService {
      * 0. chuẩn bị dữ liệu
      */
     private void prepareData() {
-
         // khởi tạo timeTables là danh sách rỗng
         timeTables = new HashMap<>();
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
@@ -256,7 +255,7 @@ public class TimeTableServiceImpl implements TimeTableService {
                                 && timeTableServiceUtil.isTeacherBusy(this.timeTables, day, order, lesson.getClazz(), teacher)
                         ) {
                             // rơi vào tình huống trùng lịch thì tìm giáo viên thay thế
-                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson);
+                            LessonKey replacementLessonKey = timeTableServiceUtil.findFirstReplacement(offLessonConfig, timeTables, day, order, lesson);
                             if (ObjectUtils.isEmpty(replacementLessonKey)) { // không tìm được giáo viên thay thế
                                 hasIssue = true;
                                 continue;
@@ -273,38 +272,6 @@ public class TimeTableServiceImpl implements TimeTableService {
             }
         } while (hasIssue);
         System.out.println("generation: " + generation);
-    }
-
-    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Lesson replacedLesson) {
-        Clazz clazz = replacedLesson.getClazz();
-        Teacher busyTeacher = replacedLesson.getTeacher();
-        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
-            for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
-                if (timeTableServiceUtil.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
-                    continue;
-                }
-                if (day == replaceDay && order == replaceOrder) {
-                    continue;
-                }
-                Lesson lesson = timeTableServiceUtil.findLessonByKeyAndClass(this.timeTables, day, order, clazz.getName());
-                if (ObjectUtils.isEmpty(lesson)) {
-                    return null;
-                }
-
-                if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !timeTableServiceUtil.isFitOffLesson(this.offLessonConfig, replaceDay, replaceOrder, lesson))
-                        || replacedLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !timeTableServiceUtil.isFitOffLesson(this.offLessonConfig, day, order, replacedLesson)) {
-                    continue;
-                }
-
-                // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
-                // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                if (!timeTableServiceUtil.isTeacherBusy(this.timeTables, replaceDay, replaceOrder, clazz, lesson.getTeacher())
-                        && !timeTableServiceUtil.isTeacherBusy(this.timeTables, day, order, clazz, busyTeacher)) {
-                    return new LessonKey(day, order);
-                }
-            }
-        }
-        return null;
     }
 
     /**

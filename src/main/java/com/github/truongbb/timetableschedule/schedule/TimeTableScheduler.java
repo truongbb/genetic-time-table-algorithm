@@ -10,13 +10,16 @@ import com.github.truongbb.timetableschedule.repository.clazz.ClazzRepository;
 import com.github.truongbb.timetableschedule.repository.subject.SubjectRepository;
 import com.github.truongbb.timetableschedule.repository.teacher.TeacherRepository;
 import com.github.truongbb.timetableschedule.repository.timetableconfig.LessonRepository;
+import com.github.truongbb.timetableschedule.service.timetable.TimeTableServiceUtil;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,17 +39,22 @@ public class TimeTableScheduler {
     private final LessonRepository lessonRepository;
     private final TeachingDayRepository teachingDayRepository;
 
+    private final TimeTableServiceUtil timeTableServiceUtil;
+
     private Map<LessonKey, List<Lesson>> bestResultsTimeTable;
 
-//    private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = new HashMap<>();
+    //    private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = new HashMap<>();
     private final Map<String, List<OffLessonConfig>> OFF_LESSONS_CONFIG = null;
 
-    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository, ClazzRepository clazzRepository, LessonRepository lessonRepository, TeachingDayRepository teachingDayRepository) {
+    public TimeTableScheduler(SubjectRepository subjectRepository, TeacherRepository teacherRepository,
+                              ClazzRepository clazzRepository, LessonRepository lessonRepository,
+                              TeachingDayRepository teachingDayRepository, TimeTableServiceUtil timeTableServiceUtil) {
         this.subjectRepository = subjectRepository;
         this.teacherRepository = teacherRepository;
         this.clazzRepository = clazzRepository;
         this.lessonRepository = lessonRepository;
         this.teachingDayRepository = teachingDayRepository;
+        this.timeTableServiceUtil = timeTableServiceUtil;
 
 //        OFF_LESSONS_CONFIG.put("10", Arrays.asList(new OffLessonConfig(3, 4), new OffLessonConfig(3, 5), new OffLessonConfig(5, 5)));
 //        OFF_LESSONS_CONFIG.put("11", Arrays.asList(new OffLessonConfig(3, 5), new OffLessonConfig(5, 5), new OffLessonConfig(6, 5)));
@@ -69,13 +77,13 @@ public class TimeTableScheduler {
 
         this.prepareData();
         this.generateBase();
-        this.showOutput(this.timeTables);
+        this.timeTableServiceUtil.showOutput(this.clazzes, this.timeTables);
 
         this.evolutionToCorrect();
-        this.showOutput(this.timeTables);
+        this.timeTableServiceUtil.showOutput(this.clazzes, this.timeTables);
 
         this.fineTuning(0, 15);
-        this.showOutput(this.bestResultsTimeTable);
+        this.timeTableServiceUtil.showOutput(this.clazzes, this.bestResultsTimeTable);
     }
 
     /**
@@ -115,7 +123,7 @@ public class TimeTableScheduler {
 
         for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) { // từ thứ 2 tới thứ bảy
             for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) { // từ tiết 1 tới tiết 5
-                if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
+                if (this.timeTableServiceUtil.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
                     continue;
                 }
                 for (int j = 0; j < this.clazzes.size(); j++) {
@@ -130,7 +138,7 @@ public class TimeTableScheduler {
                         }
 
                         if (!ObjectUtils.isEmpty(OFF_LESSONS_CONFIG) && !OFF_LESSONS_CONFIG.isEmpty()) {
-                            if (this.hasOffLesson(lesson.getClazz().getGrade())) {
+                            if (this.timeTableServiceUtil.hasOffLesson(this.waitingTimeTables, lesson.getClazz().getGrade())) {
                                 List<OffLessonConfig> offLessonConfigs = OFF_LESSONS_CONFIG.get(lesson.getClazz().getGrade());
                                 int finalDay = day;
                                 int finalOrder = order;
@@ -161,27 +169,6 @@ public class TimeTableScheduler {
                 }
             }
         }
-    }
-
-    private boolean hasOffLesson(String grade) {
-        return this.waitingTimeTables.stream().anyMatch(l -> l.getClazz().getGrade().equals(grade)
-                && l.getSubject().getName().equalsIgnoreCase(TimeTableConstants.OFF_LESSON));
-    }
-
-    private boolean isCCOrSH(int day, int order) {
-        return (day == TimeTableConstants.FIRST_DAY && order == TimeTableConstants.FIRST_ORDER) ||
-                (day == TimeTableConstants.LAST_DAY && order == TimeTableConstants.LAST_ORDER);
-    }
-
-    private Lesson findLessonByKeyAndClass(int day, int order, String className) {
-        return this.findByClassName(this.timeTables.get(new LessonKey(day, order)), className);
-    }
-
-    private Lesson findByClassName(List<Lesson> lessons, String className) {
-        if (CollectionUtils.isEmpty(lessons) || StringUtils.isEmpty(className)) {
-            return null;
-        }
-        return lessons.stream().filter(lesson -> lesson.getClazz().getName().equals(className)).findFirst().orElse(null);
     }
 
     private void setLesson(int day, int order, Lesson temp, int lessonIndex) {
@@ -255,17 +242,17 @@ public class TimeTableScheduler {
                         Teacher teacher = lesson.getTeacher();
                         if (!ObjectUtils.isEmpty(teacher)
                                 && !lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)
-                                && this.isTeacherBusy(day, order, lesson.getClazz(), teacher)
+                                && this.timeTableServiceUtil.isTeacherBusy(this.timeTables, day, order, lesson.getClazz(), teacher)
                         ) {
                             // rơi vào tình huống trùng lịch thì tìm giáo viên thay thế
-                            LessonKey replacementLessonKey = this.findFirstReplacement(day, order, lesson);
+                            LessonKey replacementLessonKey = this.timeTableServiceUtil.findFirstReplacement(OFF_LESSONS_CONFIG, this.timeTables, day, order, lesson);
                             if (ObjectUtils.isEmpty(replacementLessonKey)) { // không tìm được giáo viên thay thế
                                 hasIssue = true;
                                 continue;
                             }
                             // đảo 2 tiết cho nhau ==> giáo viên hết bị trùng lịch
                             List<Lesson> replacementLessons = this.timeTables.get(replacementLessonKey);
-                            Lesson replacementLesson = this.findByClassName(replacementLessons, lesson.getClazz().getName());
+                            Lesson replacementLesson = this.timeTableServiceUtil.findByClassName(replacementLessons, lesson.getClazz().getName());
 
                             this.timeTables.get(lessonKey).set(k, replacementLesson);
                             this.timeTables.get(replacementLessonKey).set(k, lesson);
@@ -277,67 +264,6 @@ public class TimeTableScheduler {
         System.out.println("generation: " + generation);
     }
 
-    private LessonKey findFirstReplacement(int replaceDay, int replaceOrder, Lesson replacedLesson) {
-        Clazz clazz = replacedLesson.getClazz();
-        Teacher busyTeacher = replacedLesson.getTeacher();
-        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
-            for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
-                if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
-                    continue;
-                }
-                if (day == replaceDay && order == replaceOrder) {
-                    continue;
-                }
-                Lesson lesson = this.findLessonByKeyAndClass(day, order, clazz.getName());
-                if (ObjectUtils.isEmpty(lesson)) {
-                    return null;
-                }
-
-                if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(replaceDay, replaceOrder, lesson))
-                        || replacedLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(day, order, replacedLesson)) {
-                    continue;
-                }
-
-                // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
-                // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                if (!this.isTeacherBusy(replaceDay, replaceOrder, clazz, lesson.getTeacher())
-                        && !this.isTeacherBusy(day, order, clazz, busyTeacher)) {
-                    return new LessonKey(day, order);
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean isFitOffLesson(int day, int order, Lesson lesson) {
-        if (!lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)) {
-            return false;
-        }
-        if (ObjectUtils.isEmpty(OFF_LESSONS_CONFIG) || OFF_LESSONS_CONFIG.isEmpty()) {
-            return lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && order == TimeTableConstants.LAST_ORDER;
-        }
-
-        List<OffLessonConfig> offLessonConfigs = OFF_LESSONS_CONFIG.get(lesson.getClazz().getGrade());
-        if (CollectionUtils.isEmpty(offLessonConfigs)) {
-            return false;
-        }
-        return offLessonConfigs.stream().anyMatch(c -> c.getOffDay() == day && c.getOffOrder() == order);
-    }
-
-    private boolean isTeacherBusy(int day, int order, Clazz clazz, Teacher teacher) {
-        // check giáo viên bận (cùng ngày đó, tiết đó mà giáo viên này phải dạy ở 2 hoặc nhiều lớp khác nhau thì gọi là bận)
-        return this.timeTables
-                .get(new LessonKey(day, order))
-                .stream()
-                .anyMatch(lesson ->
-                        !ObjectUtils.isEmpty(lesson.getClazz())
-                                && !ObjectUtils.isEmpty(lesson.getTeacher())
-                                && !lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON)
-                                && !lesson.getClazz().getId().equals(clazz.getId())
-                                && lesson.getTeacher().getId().equals(teacher.getId())
-                );
-    }
-
     /**
      * Lai ghép - Đánh giá - Chọn lọc
      */
@@ -347,7 +273,7 @@ public class TimeTableScheduler {
         for (int i = from; i < to; i++) {
             for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
                 for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
-                    if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
+                    if (this.timeTableServiceUtil.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
                         continue;
                     }
                     LessonKey lessonKey = new LessonKey(day, order);
@@ -356,18 +282,18 @@ public class TimeTableScheduler {
 
                         // những môn đã có 2 tiết liền nhau không được đổi nữa: VănKT, Toán, tin...
                         // trường hợp môn được đổi
-                        if (this.checkBlockSubject(lesson, day, order, k)) {
+                        if (this.timeTableServiceUtil.checkBlockSubject(this.timeTables, lesson, day, order, k)) {
                             continue;
                         }
 
-                        List<LessonKey> allReplacement = this.findAllReplacement(day, order, lesson);
+                        List<LessonKey> allReplacement = this.timeTableServiceUtil.findAllReplacement(day, order, lesson, this.availableTeachingDay, this.timeTables, OFF_LESSONS_CONFIG);
                         if (ObjectUtils.isEmpty(allReplacement)) {
                             continue;
                         }
                         for (int j = 0; j < allReplacement.size(); j++) {
                             LessonKey currentLessonKey = allReplacement.get(j);
                             List<Lesson> allReplacementLesson = this.timeTables.get(currentLessonKey);
-                            Lesson replacementLesson = this.findByClassName(allReplacementLesson, lesson.getClazz().getName());
+                            Lesson replacementLesson = this.timeTableServiceUtil.findByClassName(allReplacementLesson, lesson.getClazz().getName());
 
                             // cùng 1 môn không cần đổi
                             if (lesson.getSubject().getName().equals(replacementLesson.getSubject().getName())) {
@@ -375,25 +301,25 @@ public class TimeTableScheduler {
                             }
 
                             // nếu tiết tìm được hoặc tiết hiện tại mang đi đổi mà bị trùng tiết giáo viên ==> bỏ qua không đổi
-                            if (this.isTeacherBusy(currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson.getClazz(), lesson.getTeacher())
-                                    || this.isTeacherBusy(day, order, replacementLesson.getClazz(), replacementLesson.getTeacher())) {
+                            if (this.timeTableServiceUtil.isTeacherBusy(this.timeTables, currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson.getClazz(), lesson.getTeacher())
+                                    || this.timeTableServiceUtil.isTeacherBusy(this.timeTables, day, order, replacementLesson.getClazz(), replacementLesson.getTeacher())) {
                                 continue;
                             }
 
                             // Trường hợp ngược lại môn bị đổi: môn đã có hai tiết liền nhau
-                            if (this.checkBlockSubject(replacementLesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), k)) {
+                            if (this.timeTableServiceUtil.checkBlockSubject(this.timeTables, replacementLesson, currentLessonKey.getDay(), currentLessonKey.getOrder(), k)) {
                                 continue;
                             }
 
                             // tránh 1 ngày có cả Văn và 2 VănKT, Toán và 2 ToánKT (3 tiết văn hoặc toán), ... đối với các môn có từ 4 tiết 1 tuần trở lên
-                            if (this.checkTripleLessonInTheSameDay(lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
-                                    || this.checkTripleLessonInTheSameDay(replacementLesson, day, order)) {
+                            if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
+                                    || this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, replacementLesson, day, order)) {
                                 continue;
                             }
 
                             // tiết nghỉ theo cấu hình người dùng hoặc phải là tiết cuối của các buổi
-                            if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson))
-                                    || replacementLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(day, order, replacementLesson)) {
+                            if ((lesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.timeTableServiceUtil.isFitOffLesson(OFF_LESSONS_CONFIG, currentLessonKey.getDay(), currentLessonKey.getOrder(), lesson))
+                                    || replacementLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.timeTableServiceUtil.isFitOffLesson(OFF_LESSONS_CONFIG, day, order, replacementLesson)) {
                                 continue;
                             }
 
@@ -414,112 +340,15 @@ public class TimeTableScheduler {
                             // nếu kết quả tốt hơn thì lưu kết quả tốt nhất
                             if (max_score < score) {
                                 max_score = score;
-                                this.bestResultsTimeTable = this.saveBestResult(this.timeTables);
+                                this.bestResultsTimeTable = this.timeTableServiceUtil.saveBestResult(this.timeTables);
                             }
                             System.out.println("Lần chạy thứ " + i + " kết quả " + score + ", tốt nhất " + max_score);
-                            this.timeTables = this.saveBestResult(this.bestResultsTimeTable);
+                            this.timeTables = this.timeTableServiceUtil.saveBestResult(this.bestResultsTimeTable);
                         }
                     }
                 }
             }
         }
-    }
-
-    private boolean checkBlockSubject(Lesson lesson, int day, int order, int index) {
-        if (lesson.getSubject().getBlockNumber() != 2) {
-            return false;
-        }
-        boolean checkSub1 = false;
-        boolean checkSub2 = false;
-        boolean checkSub3 = false;
-        boolean checkSub4 = false;
-        if (order < 3) {
-            checkSub1 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
-            checkSub2 = checkAdjacentLessonBeforeReplace(day, order + 2, lesson, index);
-
-        } else {
-            checkSub1 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
-            checkSub2 = checkAdjacentLessonBeforeReplace(day, order - 2, lesson, index);
-        }
-        if (checkSub1 && !checkSub2) {
-            return true;
-        }
-        if (order != 1 && order != 5) {
-            checkSub3 = checkAdjacentLessonBeforeReplace(day, order - 1, lesson, index);
-            checkSub4 = checkAdjacentLessonBeforeReplace(day, order + 1, lesson, index);
-        }
-        if ((checkSub3 && !checkSub4) || (!checkSub3 && checkSub4)) {
-            if (checkSub1 && checkSub2) {
-                return false;
-            }
-            if (!checkSub1 && checkSub2) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Map<LessonKey, List<Lesson>> saveBestResult(Map<LessonKey, List<Lesson>> data) {
-        if (ObjectUtils.isEmpty(data) || data.isEmpty()) {
-            return null;
-        }
-        return data.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private boolean checkTripleLessonInTheSameDay(Lesson lesson, int day, int order) {
-        String subName = lesson.getSubject().getName();
-        String mainSubjName = TimeTableConstants.MAIN_LESSONS.stream().filter(l -> l.equalsIgnoreCase(subName) || l.startsWith(subName)).findFirst().orElse(null);
-        if (StringUtils.isEmpty(mainSubjName)) {
-            return false;
-        }
-        int count = 0;
-        for (int reporder = TimeTableConstants.FIRST_ORDER; reporder <= TimeTableConstants.LAST_ORDER; reporder++) {
-            if (reporder == order) {
-                continue;
-            }
-            Lesson tempLesson = this.findLessonByKeyAndClass(day, reporder, lesson.getClazz().getName());
-            if ((tempLesson.getSubject().getName().startsWith(mainSubjName) && lesson.getSubject().getName().startsWith(mainSubjName))
-                    || (tempLesson.getSubject().getName().equalsIgnoreCase(mainSubjName) && lesson.getSubject().getName().equalsIgnoreCase(mainSubjName))) {
-                count++;
-            }
-        }
-        return count >= 2;
-    }
-
-    private boolean checkAdjacentLessonBeforeReplace(int day, int order, Lesson lesson, int k) {
-        Lesson lesson1 = this.timeTables.get(new LessonKey(day, order)).get(k);
-        return lesson.getSubject().getName().equals(lesson1.getSubject().getName());
-    }
-
-    private boolean checkAdjacentLesson(int day, int order, Lesson lesson) {
-        int start, end;
-        if (day == TimeTableConstants.FIRST_DAY) {
-            start = day;
-            end = day + 1;
-        } else if (day == TimeTableConstants.LAST_DAY) {
-            start = day - 1;
-            end = day;
-        } else {
-            start = day - 1;
-            end = day + 1;
-        }
-        for (int repDay = start; repDay <= end; repDay++) {
-            for (int repOrder = TimeTableConstants.FIRST_ORDER; repOrder <= TimeTableConstants.LAST_ORDER; repOrder++) {
-                if (repDay == day && repOrder == order) {
-                    continue;
-                }
-                Lesson tempLesson = this.findLessonByKeyAndClass(repDay, repOrder, lesson.getClazz().getName());
-                if (ObjectUtils.isEmpty(tempLesson)) {
-                    continue;
-                }
-                if (tempLesson.getSubject().getId().equals(lesson.getSubject().getId())) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -555,7 +384,7 @@ public class TimeTableScheduler {
                         // kiểm tra tiết trước
                         boolean before = false;
                         List<Lesson> lessonList = this.timeTables.get(new LessonKey(day, order - 1));
-                        Lesson previousLesson = this.findByClassName(lessonList, lesson.getClazz().getName());
+                        Lesson previousLesson = this.timeTableServiceUtil.findByClassName(lessonList, lesson.getClazz().getName());
                         if (!ObjectUtils.isEmpty(previousLesson)) {
                             before = previousLesson.getSubject().getName().equals(lesson.getSubject().getName());
                         }
@@ -563,7 +392,7 @@ public class TimeTableScheduler {
                         // kiểm tra tiết sau
                         boolean after = false;
                         List<Lesson> lessonListAfter = this.timeTables.get(new LessonKey(day, order + 1));
-                        Lesson afterLesson = this.findByClassName(lessonListAfter, lesson.getClazz().getName());
+                        Lesson afterLesson = this.timeTableServiceUtil.findByClassName(lessonListAfter, lesson.getClazz().getName());
                         if (!ObjectUtils.isEmpty(afterLesson)) {
                             after = afterLesson.getSubject().getName().equals(lesson.getSubject().getName());
                         }
@@ -575,13 +404,13 @@ public class TimeTableScheduler {
                     }
 
                     // kiểm tra gv xem có bị trùng sau khi đáp ứng được các điều kiện khác không
-                    if (this.isTeacherBusy(day, order, lesson.getClazz(), lesson.getTeacher())) {
+                    if (this.timeTableServiceUtil.isTeacherBusy(this.timeTables, day, order, lesson.getClazz(), lesson.getTeacher())) {
                         score -= 500;
                     }
 
                     // Phân bố đều các môn, ví dụ môn Địa,Sinh... 1 tuần có 2 tiết sẽ có tiết cách ngày
                     if (lesson.getSubject().getRequireSpacing()) {
-                        boolean checkSpacing = this.checkAdjacentLesson(day, order, lesson);
+                        boolean checkSpacing = this.timeTableServiceUtil.checkAdjacentLesson(day, order, lesson, this.timeTables);
                         if (checkSpacing) {
                             score -= 200;
                         } else
@@ -619,7 +448,7 @@ public class TimeTableScheduler {
                     }
 
                     // một ngày có 3 tiết học giống nhau: Toán, Văn, T.Anh, KHTN
-                    if (this.checkTripleLessonInTheSameDay(lesson, day, order)) {
+                    if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, day, order)) {
                         score -= 200;
                     }
 
@@ -627,134 +456,6 @@ public class TimeTableScheduler {
             }
         }
         return score;
-    }
-
-    private List<LessonKey> findAllReplacement(int replacedDay, int replacedOrder, Lesson replacedLesson) {
-        Clazz clazz = replacedLesson.getClazz();
-        Teacher busyTeacher = replacedLesson.getTeacher();
-        List<LessonKey> result = null;
-        for (int day = TimeTableConstants.FIRST_DAY; day <= TimeTableConstants.LAST_DAY; day++) {
-            for (int order = TimeTableConstants.FIRST_ORDER; order <= TimeTableConstants.LAST_ORDER; order++) {
-                Lesson tempLesson = this.findLessonByKeyAndClass(day, order, replacedLesson.getClazz().getName());
-
-                if (this.isIgnoreCases(day, order, replacedLesson, replacedDay, replacedOrder, tempLesson)) {
-                    continue;
-                }
-
-                // nếu có giáo viên và giáo viên đó có thể dạy (không vướng lịch bận của giáo viên, không trùng vào tiết sinh hoạt, chào cờ, ...)
-                // và ngược lại giáo viên hôm nay đảo sang hôm đó cũng không bị trùng lịch
-                if (!this.isTeacherBusy(replacedDay, replacedOrder, clazz, tempLesson.getTeacher())
-                        && !this.isTeacherBusy(day, order, clazz, busyTeacher)) {
-                    if (CollectionUtils.isEmpty(result)) {
-                        result = new ArrayList<>();
-                    }
-                    result.add(new LessonKey(day, order));
-                }
-            }
-        }
-        return result;
-    }
-
-    private boolean isIgnoreCases(int day, int order, Lesson replacedLesson, int replacedDay, int replacedOrder, Lesson tempLesson) {
-        if (this.isCCOrSH(day, order)) { // bỏ qua tiết chào cờ và sinh hoạt lớp
-            return true;
-        }
-
-        if (replacedDay == day && order == replacedOrder) {
-            return true;
-        }
-        String subjectName = replacedLesson.getSubject().getName();
-        if (ObjectUtils.isEmpty(tempLesson)) {
-            return true;
-        }
-
-        // không đổi chỗ 2 môn giống nhau
-        if (tempLesson.getSubject().getName().equals(subjectName)) {
-            return true;
-        }
-
-
-        // tránh xếp lịch cho những gv thỉnh giảng dạy vào những ngày gv đó không đi dạy được
-        if (this.checkVisitingTeacherSchedule(replacedLesson, day) || this.checkVisitingTeacherSchedule(tempLesson, replacedDay)) {
-            return true;
-        }
-
-        // tránh gv có con nhỏ hoặc nhà xa dạy tiết 1
-        if (this.hasChildrenOrFarFromHome(tempLesson, order, replacedLesson, replacedOrder)) {
-            return true;
-        }
-
-        // môn sinh, địa, thể dục, ... không học 2 ngày liên tiếp
-        if ((tempLesson.getSubject().getRequireSpacing() && this.checkAdjacentLesson(replacedDay, replacedOrder, tempLesson))
-                || (replacedLesson.getSubject().getRequireSpacing() && this.checkAdjacentLesson(day, order, replacedLesson))) {
-            return true;
-        }
-
-        // môn học tránh tiết cuối
-        if (this.isAvoidLastLessonSubject(tempLesson, order, replacedLesson, replacedOrder)) {
-            return true;
-        }
-
-        // tiết nghỉ theo cấu hình người dùng hoặc phải là tiết cuối của các buổi
-        if ((tempLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(replacedDay, replacedOrder, tempLesson))
-                || replacedLesson.getSubject().getName().equals(TimeTableConstants.OFF_LESSON) && !this.isFitOffLesson(day, order, replacedLesson)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private boolean hasChildrenOrFarFromHome(Lesson lesson, int order, Lesson replacedLesson, int replacedOrder) {
-        return (replacedOrder == TimeTableConstants.FIRST_ORDER && (lesson.getTeacher().getHasChildren() || lesson.getTeacher().getHasFarfromHome()))
-                || (order == TimeTableConstants.FIRST_ORDER && (replacedLesson.getTeacher().getHasChildren() || replacedLesson.getTeacher().getHasFarfromHome()));
-    }
-
-    private boolean isAvoidLastLessonSubject(Lesson lesson, int order, Lesson replacedLesson, int replacedOrder) {
-        return (replacedLesson.getSubject().getAvoidLastLesson() && order == TimeTableConstants.LAST_ORDER)
-                || (lesson.getSubject().getAvoidLastLesson() && replacedOrder == TimeTableConstants.LAST_ORDER);
-    }
-
-    private boolean checkVisitingTeacherSchedule(Lesson lesson, int day) {
-        List<AvailableTeachingDay> availableTeachingDays = this.findAvailableTeachingDays(lesson.getTeacher());
-        boolean canTeachFullWeek = CollectionUtils.isEmpty(availableTeachingDays);
-        boolean canTeachInDay = false;
-        if (!canTeachFullWeek) {
-            canTeachInDay = availableTeachingDays.stream().anyMatch(d -> d.getAvailableDay() == day);
-        }
-        return !canTeachFullWeek && !canTeachInDay;
-    }
-
-    private List<AvailableTeachingDay> findAvailableTeachingDays(Teacher teacher) {
-        return this.availableTeachingDay
-                .stream()
-                .filter(t -> t.getTeacher().getId().equals(teacher.getId()))
-                .collect(Collectors.toList());
-    }
-
-    private void showOutput(Map<LessonKey, List<Lesson>> mapData) {
-        this.clazzes.forEach(c -> System.out.print("\t\t\t\t\t\t\t " + c.getName() + " "));
-        System.out.println();
-        mapData
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEach(entry -> {
-                    LessonKey lessonKey = entry.getKey();
-                    List<Lesson> lessons = entry.getValue();
-                    lessons = lessons
-                            .stream()
-                            .sorted(Comparator.comparing(l -> l.getClazz().getName()))
-                            .collect(Collectors.toList());
-                    System.out.print("Thứ " + lessonKey.getDay() + ", tiết " + lessonKey.getOrder() + "\t\t");
-                    lessons.forEach(l -> {
-                        if (ObjectUtils.isEmpty(l.getTeacher())) {
-                            System.out.printf("%-7s - %-12s\t\t\t\t|\t", "NULL", l.getSubject().getName());
-                            return;
-                        }
-                        System.out.printf("%-7s - %-12s\t\t\t\t|\t", l.getTeacher().getName(), l.getSubject().getName());
-                    });
-                    System.out.println();
-                });
     }
 
 }
