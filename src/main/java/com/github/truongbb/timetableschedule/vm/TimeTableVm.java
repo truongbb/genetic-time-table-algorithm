@@ -27,5 +27,6 @@ public class TimeTableVm {
     List<AvailableTeachingDayVm> availableTeachingDay;
 
     Integer generationNum;
+    String mainLessons;
 
 }

@@ -164,9 +164,9 @@ public class TimeTableServiceUtil {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public boolean checkTripleLessonInTheSameDay(Map<LessonKey, List<Lesson>> timeTables, Lesson lesson, int day, int order) {
+    public boolean checkTripleLessonInTheSameDay(Map<LessonKey, List<Lesson>> timeTables, List<String> mainLessons, Lesson lesson, int day, int order) {
         String subName = lesson.getSubject().getName();
-        String mainSubjName = TimeTableConstants.MAIN_LESSONS.stream().filter(l -> l.equalsIgnoreCase(subName) || l.startsWith(subName)).findFirst().orElse(null);
+        String mainSubjName = mainLessons.stream().filter(l -> l.equalsIgnoreCase(subName) || l.startsWith(subName)).findFirst().orElse(null);
         if (StringUtils.isEmpty(mainSubjName)) {
             return false;
         }
