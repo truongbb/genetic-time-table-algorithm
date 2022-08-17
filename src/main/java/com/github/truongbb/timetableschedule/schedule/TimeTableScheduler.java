@@ -312,8 +312,8 @@ public class TimeTableScheduler {
                             }
 
                             // tránh 1 ngày có cả Văn và 2 VănKT, Toán và 2 ToánKT (3 tiết văn hoặc toán), ... đối với các môn có từ 4 tiết 1 tuần trở lên
-                            if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
-                                    || this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, replacementLesson, day, order)) {
+                            if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, TimeTableConstants.MAIN_LESSONS, lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
+                                    || this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, TimeTableConstants.MAIN_LESSONS, replacementLesson, day, order)) {
                                 continue;
                             }
 
@@ -448,7 +448,7 @@ public class TimeTableScheduler {
                     }
 
                     // một ngày có 3 tiết học giống nhau: Toán, Văn, T.Anh, KHTN
-                    if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, day, order)) {
+                    if (this.timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, TimeTableConstants.MAIN_LESSONS, lesson, day, order)) {
                         score -= 200;
                     }
 

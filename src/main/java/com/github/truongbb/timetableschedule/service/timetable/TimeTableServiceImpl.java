@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +33,7 @@ public class TimeTableServiceImpl implements TimeTableService {
     Map<LessonKey, List<Lesson>> timeTables; // các tiết học kết quả
     Map<LessonKey, List<Lesson>> bestResultsTimeTable;
     Map<String, List<OffLessonConfig>> offLessonConfig;
+    List<String> mainLessons;
 
     @Autowired
     TimeTableServiceUtil timeTableServiceUtil;
@@ -75,6 +74,16 @@ public class TimeTableServiceImpl implements TimeTableService {
             }
         }
         this.offLessonConfig = timeTableVm.getOffLessonConfig();
+
+        String mainLessonStr = timeTableVm.getMainLessons();
+        this.mainLessons = new ArrayList<>();
+        if (!StringUtils.isEmpty(mainLessonStr)) {
+            StringTokenizer stringTokenizer = new StringTokenizer(mainLessonStr, ",");
+            while (stringTokenizer.hasMoreTokens()) {
+                this.mainLessons.add(stringTokenizer.nextToken());
+            }
+        }
+
     }
 
     private boolean validateInputData() throws IllegalArgumentException {
@@ -327,9 +336,11 @@ public class TimeTableServiceImpl implements TimeTableService {
                             }
 
                             // tránh 1 ngày có cả Văn và 2 VănKT, Toán và 2 ToánKT (3 tiết văn hoặc toán), ... đối với các môn có từ 4 tiết 1 tuần trở lên
-                            if (timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
-                                    || timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, replacementLesson, day, order)) {
-                                continue;
+                            if (!CollectionUtils.isEmpty(this.mainLessons)) {
+                                if (timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, this.mainLessons, lesson, currentLessonKey.getDay(), currentLessonKey.getOrder())
+                                        || timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, this.mainLessons, replacementLesson, day, order)) {
+                                    continue;
+                                }
                             }
 
                             // tiết nghỉ theo cấu hình người dùng hoặc phải là tiết cuối của các buổi
@@ -463,8 +474,10 @@ public class TimeTableServiceImpl implements TimeTableService {
                     }
 
                     // một ngày có 3 tiết học giống nhau: Toán, Văn, T.Anh, KHTN
-                    if (timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, lesson, day, order)) {
-                        score -= 200;
+                    if (!CollectionUtils.isEmpty(this.mainLessons)) {
+                        if (timeTableServiceUtil.checkTripleLessonInTheSameDay(this.timeTables, this.mainLessons, lesson, day, order)) {
+                            score -= 200;
+                        }
                     }
 
                 }
