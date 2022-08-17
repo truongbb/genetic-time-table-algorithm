@@ -28,4 +28,9 @@ public class AvailableTeachingDay implements Serializable {
     @Column(name = "AVAILABLE_DAY", nullable = false)
     Integer availableDay;
 
+    public AvailableTeachingDay(Teacher teacher, Integer availableDay) {
+        this.teacher = teacher;
+        this.availableDay = availableDay;
+    }
+
 }
