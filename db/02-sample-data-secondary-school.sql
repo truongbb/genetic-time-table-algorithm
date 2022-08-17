@@ -29,47 +29,47 @@ insert into clazz(id, name, grade) VALUES (15,'9C', '9');
 insert into clazz(id, name, grade) VALUES (16,'9D', '9');
 
 -- dữ liệu bảng giáo viên
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (1,'Thơm',1,null,1);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (2,'Huyền',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (3,'Mai',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (4,'Bông',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (5,'Nhật',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (6,'N.Hương',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (7,'Chuyên',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (8,'Ly',0,null,2);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (9,'Tuyết',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (10,'H.Hà',0,null,9);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (1,'Thơm',1,null,1,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (2,'Huyền',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (3,'Mai',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (4,'Bông',0,null,null,1);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (5,'Nhật',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (6,'N.Hương',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (7,'Chuyên',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (8,'Ly',0,null,2,1);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (9,'Tuyết',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (10,'H.Hà',0,null,9,1);
 
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (11,'Nghiệp',0,1,10);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (12,'Tuấn',0,0,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (20,'H.Hoa',0,1,4);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (21,'Tuyên',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (22,'H.Hương',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (23,'T.Xuyến',0,1,3);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (11,'Nghiệp',0,1,10,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (12,'Tuấn',0,0,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (20,'H.Hoa',0,1,4,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (21,'Tuyên',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (22,'H.Hương',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (23,'T.Xuyến',0,1,3,0);
 
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (24,'Long',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (25,'Phương',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (26,'Tâm',0,1,5);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (27,'N.Xuyến',0,1,7);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (28,'Hường',0,1,11);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (29,'T.Hoa',0,1,6);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (24,'Long',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (25,'Phương',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (26,'Tâm',0,1,5,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (27,'N.Xuyến',0,1,7,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (28,'Hường',0,1,11,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (29,'T.Hoa',0,1,6,0);
 
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (30,'Ngát',1,1,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (31,'Nhung',0,null,8);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (32,'HàHT',0,null,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (33,'Nguyệt',1,1,15);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (30,'Ngát',1,1,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (31,'Nhung',0,null,8,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (32,'HàHT',0,null,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (33,'Nguyệt',1,1,15,0);
 
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (34,'L.Anh',1,1,12);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (35,'Hướng',1,1,14);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (36,'T.Hà',1,1,13);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (37,'Tân',1,1,16);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (38,'Quang',0,null ,null);
-insert into teachers(id, name,has_children,skip_days,head_clazz_id) VALUES (39,'Toàn',0,null ,null);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (34,'L.Anh',1,1,12,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (35,'Hướng',1,1,14,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (36,'T.Hà',1,1,13,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (37,'Tân',1,1,16,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (38,'Quang',0,null ,null,0);
+insert into teachers(id, name,has_children,skip_days,head_clazz_id, has_farfrom_home) VALUES (39,'Toàn',0,null ,null,0);
 
 -- dữ liệu bảng subjects
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (1,'Toán',null,0,1,0,'Toán', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (2,'Tin',1,2,0,1,'Tin', 0);
-insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (3,'Anh',null,0,1,1,'Anh', 0);
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (3,'Tiếng Anh',null,0,1,1,'Anh', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (4,'Sinh',null,0,1,1,'Sinh', 0);
 
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (5,'Văn',null,0,1,0,'Văn', 0);
@@ -284,7 +284,7 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (165, 21, 16, 12, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (166, 30, 3, 12, 3);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (167, 29, 17, 12, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (168, 1, 6, 12, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (168, 1, 6, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (169, 25, 12, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (170, 31, 8, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (171, 39, 4, 12, 2);
@@ -433,12 +433,12 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (284, 35, 20, 16, 2);
 
 -- insert dữ liệu bảng available_teaching_day
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('1', '3');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('1', '5');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '2');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '4');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('7', '5');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('22', '6');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('22', '4');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('10', '5');
-INSERT INTO AVAILABLE_TEACHING_DAY (TEACHER_ID, AVAILABLE_DAY) VALUES ('10', '7');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (1, '1', '3');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (2, '1', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (3, '7', '2');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (4, '7', '4');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (5, '7', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (6, '22', '6');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (7, '22', '4');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (8, '10', '5');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (9, '10', '7');

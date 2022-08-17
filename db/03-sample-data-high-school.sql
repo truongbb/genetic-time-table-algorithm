@@ -102,7 +102,7 @@ insert into teachers(id, name,has_children,skip_days,head_clazz_id,has_farfrom_h
 -- dữ liệu bảng subjects
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (1,'Toán',null,0,1,0,'Toán', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (2,'Tin',1,2,0,1,'Tin', 0);
-insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (3,'T.Anh',null,0,1,1,'Anh', 0);
+insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (3,'Tiếng Anh',null,0,0,0,'Anh', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (4,'Sinh học',null,0,1,1,'Sinh', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (5,'Văn',null,2,1,0,'Văn', 0);
 insert into subjects(id, name,lab_id,block_number,avoid_last_lesson,require_spacing,group_name,priority_number) VALUES (6,'Sử',null,0,0,1,'Sử', 0);
@@ -213,7 +213,7 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (77, 23, 7, 6, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (78, 44, 5, 6, 3);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (79, 27, 8, 6, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (80, 28, 6, 6, 2);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (80, 28, 6, 6, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (81, 4, 17, 6, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (82, 39, 1, 6, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (83, 22, 11, 6, 1);
@@ -295,14 +295,13 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (144, 40, 4, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (145, 49, 12, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (146, 46, 2, 11, 2);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (147, 50, 6, 11, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (147, 50, 6, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (148, 51, 17, 11, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (149, 52, 8, 11, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (150, 21, 9, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (151, 53, 16, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (152, 54, 7, 11, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (153, 46, 11, 11, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (154, 46, 19, 11, 1);
 
 --11A2
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (155, 35, 16, 12, 2);
@@ -311,14 +310,13 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (158, 40, 4, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (159, 54, 7, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (160, 49, 12, 12, 2);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (161, 50, 6, 12, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (161, 50, 6, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (162, 8, 5, 12, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (163, 46, 2, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (164, 21, 9, 12, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (165, 52, 8, 12, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (166, 51, 17, 12, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (167, 6, 11, 12, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (168, 6, 19, 12, 1);
 
 
 
@@ -332,11 +330,10 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (187, 52, 8, 13, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (188, 51, 17, 13, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (189, 53, 16, 13, 2);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (190, 50, 6, 13, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (190, 50, 6, 13, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (191, 5, 7, 13, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (192, 46, 2, 13, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (193, 53, 11, 13, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (194, 53, 19, 13, 1);
 
 
 --11A4
@@ -347,20 +344,19 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (200, 57, 1, 14, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (201, 52, 8, 14, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (202, 46, 2, 14, 2);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (203, 50, 6, 14, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (203, 50, 6, 14, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (204, 10, 12, 14, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (205, 51, 17, 14, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (206, 55, 4, 14, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (207, 5, 7, 14, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (208, 45, 11, 14, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (209, 45, 19, 14, 1);
 
 --11A5
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (211, 51, 17, 15, 1);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (212, 31, 12, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (213, 58, 5, 15, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (214, 59, 3, 15, 4);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (215, 50, 6, 15, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (215, 50, 6, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (216, 2, 1, 15, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (217, 35, 16, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (218, 21, 9, 15, 2);
@@ -369,10 +365,9 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (221, 46, 2, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (222, 23, 7, 15, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (223, 55, 11, 15, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (225, 55, 19, 15, 1);
 
 --11A6
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (226, 56, 6, 16, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (226, 56, 6, 16, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (227, 45, 3, 16, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (228, 2, 1, 16, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (229, 37, 2, 16, 2);
@@ -385,7 +380,6 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (236, 10, 12, 16, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (237, 62, 9, 16, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (238, 56, 11, 16, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (239, 56, 19, 16, 1);
 
 --11A7
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (241, 48, 5, 17, 4);
@@ -393,7 +387,7 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (243, 43, 3, 17, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (244, 31, 12, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (245, 61, 8, 17, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (246, 50, 6, 17, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (246, 50, 6, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (247, 40, 4, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (248, 53, 16, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (249, 62, 9, 17, 2);
@@ -401,7 +395,6 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (251, 23, 7, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (252, 37, 2, 17, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (253, 40, 11, 17, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (254, 40, 19, 17, 1);
 
 --11A8
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (255, 43, 3, 18, 4);
@@ -412,12 +405,11 @@ insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quan
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (260, 58, 5, 18, 4);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (261, 10, 12, 18, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (262, 37, 2, 18, 2);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (263, 50, 6, 18, 1);
+insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (263, 50, 6, 18, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (264, 62, 9, 18, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (265, 23, 7, 18, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (266, 35, 16, 18, 2);
 insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (267, 50, 11, 18, 1);
-insert into time_table_config (id, teacher_id, subject_id, clazz_id, lesson_quantity) values (268, 50, 19, 18, 1);
 
 -- 12
 -- 12A1
@@ -548,7 +540,7 @@ INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (2, '1
 INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (3, '7', '2');
 INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (4, '7', '4');
 INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (5, '7', '5');
-INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (6, '22', '6');
-INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (7, '22', '4');
 INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (8, '10', '5');
-INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (9, '10', '7');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (9, '10', '3');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (10, '10', '4');
+INSERT INTO AVAILABLE_TEACHING_DAY (ID, TEACHER_ID, AVAILABLE_DAY) VALUES (11, '10', '2');
