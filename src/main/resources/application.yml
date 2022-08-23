@@ -7,7 +7,7 @@ server:
 
 spring:
   application:
-    name: 'tim-table-scheduling'
+    name: 'time-table-scheduling'
 
   jpa:
     database-platform: org.hibernate.dialect.Oracle10gDialect
