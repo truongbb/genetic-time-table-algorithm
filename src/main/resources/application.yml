@@ -11,10 +11,6 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.Oracle10gDialect
-    properties:
-      hibnernate:
-        jdbc:
-          batch_size: 5000
     show-sql: true
 
   datasource:
